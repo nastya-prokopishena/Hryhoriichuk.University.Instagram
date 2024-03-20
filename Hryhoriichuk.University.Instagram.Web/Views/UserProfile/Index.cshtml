@@ -1,0 +1,21 @@
+﻿@page
+@model Hryhoriichuk.University.Instagram.Web.Models.UserProfile
+
+@{
+    Layout = "_Layout";
+}
+
+
+@using Microsoft.AspNetCore.Identity
+@using Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+
+<div>
+    <p>Full Name:</> @Model.FullName</p>
+    <p><strong>User Name:</strong> @Model.UserName</p>
+    <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Locked Out:</strong> @(Model.IsLockedOut ? "Yes" : "No")</p>
+</div>

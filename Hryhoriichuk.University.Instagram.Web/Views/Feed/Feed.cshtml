@@ -1,0 +1,34 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.Follow
+
+@{
+    Layout = "_Layout";
+}
+
+@using Microsoft.AspNetCore.Identity
+@using Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+
+<h1>Feed</h1>
+@*
+@if (Model != null)
+{
+    <div>
+        <ul>
+            @foreach (var post in Model)
+            {
+                <li>@post.Content</li>
+                <!-- Display other post properties as needed -->
+            }
+        </ul>
+    </div>
+}
+else
+{
+    <p>No posts available.</p>
+}
+*@
+
+<p>No posts available.</p>

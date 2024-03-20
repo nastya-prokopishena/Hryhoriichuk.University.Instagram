@@ -1,0 +1,21 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.MyProfile
+
+@{
+    Layout = "_Layout";
+}
+
+@using Microsoft.AspNetCore.Identity
+@using Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+
+<h1>My Profile</h1>
+
+<div>
+    <p>My ID:</> @Model.Id</p>
+    <p>Full Name:</> @Model.FullName</p>
+    <p><strong>User Name:</strong> @Model.UserName</p>
+    <p><strong>Email:</strong> @Model.Email</p>
+</div>

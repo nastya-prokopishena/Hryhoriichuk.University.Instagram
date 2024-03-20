@@ -1,8 +1,10 @@
 ﻿using Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data;
+using Hryhoriichuk.University.Instagram.Web.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Hosting;
 
 namespace Hryhoriichuk.University.Instagram.Web.Data;
 
@@ -12,14 +14,26 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
         : base(options)
     {
     }
-
+    public DbSet<Follow> Follows { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        // Customize the ASP.NET Identity model and override the defaults if needed.
-        // For example, you can rename the ASP.NET Identity table names and more.
-        // Add your customizations after calling base.OnModelCreating(builder);
-        builder.ApplyConfiguration(new ApplicationUserEntityConfiguration());
+        // Configure the many-to-many relationship for following/followers
+
+        builder.Entity<Follow>()
+                .HasKey(f => new { f.FollowerId, f.FolloweeId });
+
+        builder.Entity<Follow>()
+            .HasOne(f => f.Follower)
+            .WithMany(u => u.Followings)
+            .HasForeignKey(f => f.FollowerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Follow>()
+            .HasOne(f => f.Followee)
+            .WithMany(u => u.Followers)
+            .HasForeignKey(f => f.FolloweeId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 
