@@ -28,8 +28,22 @@ Add your task decomposition here.
 - Set up Continuous Integration/Continuous Delivery pipeline ✔️
 
 ### Week 2:
-- Implement feature: User Profile
+- Implement feature: User Profile ✔️
 - Set up Entity Framework for database interaction ✔️
 - Design and implement user profile UI
 - Integrate Google account authorization ✔️
 - Create unit tests for user registration and profile functionalities
+
+### Week 3:
+- Implement feature: Feed ✔️
+- Develop algorithms for generating user feeds based on followings ✔️
+- Design feed UI components ✔️
+- Implement like and comment functionalities ✔️
+- Set up monitoring and logging for feed interactions
+
+### Week 4:
+- Implement feature: Upload Media
+- Create upload interface for photos and videos
+- Implement media storage using Azure Storage Account
+- Develop backend validation for uploaded media
+- Write unit tests for media upload functionality
