@@ -42,8 +42,8 @@ Add your task decomposition here.
 - Set up monitoring and logging for feed interactions
 
 ### Week 4:
-- Implement feature: Upload Media
-- Create upload interface for photos and videos
+- Implement feature: Upload Media ✔️
+- Create upload interface for photos and videos ✔️
 - Implement media storage using Azure Storage Account
-- Develop backend validation for uploaded media
+- Develop backend validation for uploaded media ✔️
 - Write unit tests for media upload functionality
