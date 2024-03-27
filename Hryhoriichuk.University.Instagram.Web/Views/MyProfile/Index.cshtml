@@ -10,12 +10,35 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-
-<h1>My Profile</h1>
-
 <div>
-    <p>My ID:</> @Model.Id</p>
-    <p>Full Name:</> @Model.FullName</p>
+    <p>Full Name:</p> @Model.FullName
     <p><strong>User Name:</strong> @Model.UserName</p>
     <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Locked Out:</strong> @(Model.IsLockedOut ? "Yes" : "No")</p>
+</div>
+
+<hr />
+
+<div>
+    <h4>My Posts</h4>
+    @if (Model.Posts != null && Model.Posts.Any())
+    {
+        <div class="row">
+            @foreach (var post in Model.Posts)
+            {
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <img class="card-img-top" src="@post.ImagePath" alt="Post Image">
+                        <div class="card-body">
+                            <p class="card-text">@post.Caption</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No posts found.</p>
+    }
 </div>

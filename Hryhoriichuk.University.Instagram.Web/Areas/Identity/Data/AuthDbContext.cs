@@ -14,6 +14,7 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
         : base(options)
     {
     }
+    public DbSet<Post> Posts { get; set; }
     public DbSet<Follow> Follows { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {

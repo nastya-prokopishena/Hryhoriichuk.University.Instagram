@@ -1,8 +1,12 @@
 ﻿using Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data;
+using Hryhoriichuk.University.Instagram.Web.Data;
 using Hryhoriichuk.University.Instagram.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Hryhoriichuk.University.Instagram.Web.Controllers
@@ -10,10 +14,12 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
     public class MyProfileController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly AuthDbContext _context;
 
-        public MyProfileController(UserManager<ApplicationUser> userManager)
+        public MyProfileController(UserManager<ApplicationUser> userManager, AuthDbContext context)
         {
             _userManager = userManager;
+            _context = context;
         }
 
         [HttpGet]
@@ -36,16 +42,27 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 return View("Error"); // Example error view
             }
 
-            // Map user information to UserViewModel
-            var Model = new MyProfile
+            // Get the ID of the currently logged-in user
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Get the user's posts
+            var userPosts = await _context.Posts
+                .Where(p => p.UserId == userId)
+                .ToListAsync();
+
+
+
+            // Map user information and posts to MyProfile model
+            var model = new MyProfile
             {
                 Id = currentUser.Id,
                 FullName = currentUser.FullName,
                 UserName = currentUser.UserName,
                 Email = currentUser.Email,
+                Posts = userPosts // Assign the user's posts to the model
             };
 
-            return View(Model);
+            return View(model);
         }
     }
 }

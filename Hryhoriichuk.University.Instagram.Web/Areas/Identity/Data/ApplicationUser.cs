@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Hryhoriichuk.University.Instagram.Web.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data;
 

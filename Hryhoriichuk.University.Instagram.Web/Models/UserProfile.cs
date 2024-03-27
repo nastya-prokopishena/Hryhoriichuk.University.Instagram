@@ -20,6 +20,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Models
 
         /// public List<RolesViewModel> UserInRoles { get; set; }
         public bool IsLockedOut { get; set; }
-
-    }
+		public ICollection<Post> Posts { get; set; }
+	}
 }
