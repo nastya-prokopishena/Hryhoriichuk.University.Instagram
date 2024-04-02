@@ -29,6 +29,7 @@ builder.Services.AddRazorPages();
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireUppercase = false;
+
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -43,7 +44,19 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllerRoute(
+            name: "MyProfileWithNickname",
+            pattern: "MyProfile/{nickname}",
+            defaults: new { controller = "MyProfile", action = "Index" });
+
+        // Add other endpoints as needed...
+    });
 }
+
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

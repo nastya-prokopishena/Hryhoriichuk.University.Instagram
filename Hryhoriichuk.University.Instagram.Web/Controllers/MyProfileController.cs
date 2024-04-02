@@ -24,6 +24,29 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
 
         [HttpGet]
         [Authorize]
+        public async Task<IActionResult> PostDetail(int id)
+        {
+            // Retrieve the post from the database
+            var post = await _context.Posts.FindAsync(id);
+
+            // Check if post exists
+            if (post == null)
+            {
+                return NotFound(); // Or handle the situation accordingly
+            }
+
+            // Retrieve the username of the user who posted the post
+            var user = await _userManager.FindByIdAsync(post.UserId);
+            var username = user.UserName;
+
+            // Pass the username along with the post to the view
+            ViewBag.PostUsername = username;
+
+            return View(post);
+        }
+
+        [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             if (!User.Identity.IsAuthenticated)
@@ -49,8 +72,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             var userPosts = await _context.Posts
                 .Where(p => p.UserId == userId)
                 .ToListAsync();
-
-
 
             // Map user information and posts to MyProfile model
             var model = new MyProfile

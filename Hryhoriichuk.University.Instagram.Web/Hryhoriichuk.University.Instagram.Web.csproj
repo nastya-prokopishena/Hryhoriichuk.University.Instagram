@@ -31,4 +31,8 @@
     <Folder Include="Views\IndexModel\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Views\MyProfile\PostDetail\PostDetail.cshtml" />
+  </ItemGroup>
+
 </Project>
