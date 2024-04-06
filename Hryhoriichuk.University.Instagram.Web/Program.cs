@@ -46,33 +46,33 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // Move authentication before authorization
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapRazorPages();
-    endpoints.MapControllers();
+app.MapRazorPages();
+app.MapControllers();
 
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-    endpoints.MapControllerRoute(
-        name: "profile",
-        pattern: "Profile/{username}",
-        defaults: new { controller = "Profile", action = "Index" });
+app.MapControllerRoute(
+    name: "profile",
+    pattern: "Profile/{username}",
+    defaults: new { controller = "Profile", action = "Index" });
 
-    endpoints.MapControllerRoute(
-        name: "follow",
-        pattern: "follow/{action}/{id?}",
-        defaults: new { controller = "Follow" });
-});
+app.MapControllerRoute(
+    name: "follow",
+    pattern: "follow/{action}/{id?}",
+    defaults: new { controller = "Follow" });
+
+app.MapRazorPages();
 
 app.UseSwagger();
 app.UseSwaggerUI();
