@@ -1,0 +1,53 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.PostInfo
+
+@{
+    int likeCount = ViewBag.LikeCount;
+    bool isLiked = ViewBag.IsLiked;
+}
+
+<form id="likeForm" method="post" action="@Url.Action("ToggleLike", "Profile")">
+    <div class="mb-3">
+        <input type="hidden" name="postId" value="@Model.Id" />
+        <button type="submit" class="btn btn-primary me-3" id="likeButton">
+            @if (@isLiked)
+            {
+                <text>Unlike</text>
+            }
+            else
+            {
+                <text>Like</text>
+            }
+        </button>
+    </div>
+</form>
+
+@section scripts {
+    <script>
+        // Function to handle toggling likes
+        document.getElementById('likeForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Make an AJAX request to the server to toggle the like
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // If the request was successful, update the UI accordingly
+                        return response.json();
+                    } else {
+                        throw new Error('Toggle like request failed');
+                    }
+                })
+                .then(data => {
+                    // Update the like count in the UI
+                    document.getElementById('likeCount').textContent = data.LikeCount;
+                })
+                .catch(error => {
+                    // Handle errors
+                    console.error('Error:', error);
+                });
+        });
+    </script>
+}

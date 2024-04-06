@@ -44,34 +44,35 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllerRoute(
-            name: "MyProfileWithNickname",
-            pattern: "MyProfile/{nickname}",
-            defaults: new { controller = "MyProfile", action = "Index" });
-
-        // Add other endpoints as needed...
-    });
 }
-
-
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication(); // Move authentication before authorization
 app.UseAuthorization();
 
-app.MapRazorPages();
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapRazorPages();
+    endpoints.MapControllers();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapRazorPages();
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+
+    endpoints.MapControllerRoute(
+        name: "profile",
+        pattern: "Profile/{username}",
+        defaults: new { controller = "Profile", action = "Index" });
+
+    endpoints.MapControllerRoute(
+        name: "follow",
+        pattern: "follow/{action}/{id?}",
+        defaults: new { controller = "Follow" });
+});
 
 app.UseSwagger();
 app.UseSwaggerUI();

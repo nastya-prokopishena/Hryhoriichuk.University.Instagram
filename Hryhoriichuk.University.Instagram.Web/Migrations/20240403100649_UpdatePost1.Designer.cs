@@ -4,6 +4,7 @@ using Hryhoriichuk.University.Instagram.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hryhoriichuk.University.Instagram.Web.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240403100649_UpdatePost1")]
+    partial class UpdatePost1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -347,7 +350,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                     b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Post");
@@ -377,7 +380,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Like", b =>
                 {
                     b.HasOne("Hryhoriichuk.University.Instagram.Web.Models.Post", "Post")
-                        .WithMany("Likes")
+                        .WithMany()
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -465,8 +468,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Post", b =>
                 {
                     b.Navigation("Comments");
-
-                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

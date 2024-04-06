@@ -1,4 +1,4 @@
-﻿@model Hryhoriichuk.University.Instagram.Web.Models.MyProfile
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.Profile
 
 @{
     Layout = "_Layout";
@@ -51,23 +51,25 @@
     <p>Full Name:</p> @Model.FullName
     <p><strong>User Name:</strong> @Model.UserName</p>
     <p><strong>Email:</strong> @Model.Email</p>
-    <p><strong>Locked Out:</strong> @(Model.IsLockedOut ? "Yes" : "No")</p>
 </div>
 
 <hr />
 
 <div>
-    <h4>My Posts</h4>
+    <h4>Posts</h4>
     @if (Model.Posts != null && Model.Posts.Any())
     {
         <div class="posts-grid">
             @foreach (var post in Model.Posts.OrderByDescending(p => p.DatePosted))
             {
                 <div class="post-card">
-                    <div class="post-image" style="background-image: url('@post.ImagePath')" onclick="location.href='@Url.Action("PostDetail", "MyProfile", new { id = post.Id })'"></div>
-                    <div class="post-caption">@post.Caption</div>
+                    <a href="@Url.Action("PostDetail", "Profile", new { username = Model.UserName, postId = post.Id })">
+                        <div class="post-image" style="background-image: url('@post.ImagePath')"></div>
+                        <div class="post-caption">@post.Caption</div>
+                    </a>
                 </div>
             }
+
         </div>
     }
     else
@@ -75,3 +77,22 @@
         <p>No posts found.</p>
     }
 </div>
+
+@if (User.Identity.IsAuthenticated && User.Identity.Name != Model.UserName)
+{
+    @if (Model.IsFollowing)
+    {
+        <form id="unfollowForm" asp-controller="Follow" asp-action="Unfollow" method="post">
+            <input type="hidden" name="userIdToUnfollow" value="@Model.Id" />
+            <button type="submit" id="unfollowButton">Unfollow</button>
+        </form>
+    }
+    else
+    {
+        <form id="followForm" asp-controller="Follow" asp-action="Follow" method="post">
+            <input type="hidden" name="userIdToFollow" value="@Model.Id" />
+            <button type="submit" id="followButton">Follow</button>
+        </form>
+    }
+}
+

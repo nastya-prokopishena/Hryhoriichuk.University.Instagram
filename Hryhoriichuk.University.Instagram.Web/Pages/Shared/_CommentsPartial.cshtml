@@ -1,0 +1,25 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.PostInfo
+
+<div>
+    <h3>Comments</h3>
+    <ul>
+        @foreach (var comment in Model.Comments)
+        {
+            <li>
+                @if (comment.User != null)
+                {
+                    <span>@comment.User.UserName:</span> @comment.Text
+                }
+                else
+                {
+                    <span>Unknown User:</span> @comment.Text
+                }
+            </li>
+        }
+    </ul>
+    <form id="commentForm" asp-controller="Profile" asp-action="AddComment" method="post">
+        <input type="hidden" name="postId" value="@Model.Post.Id" />
+        <textarea name="commentText"></textarea>
+        <button type="submit">Add Comment</button>
+    </form>
+</div>

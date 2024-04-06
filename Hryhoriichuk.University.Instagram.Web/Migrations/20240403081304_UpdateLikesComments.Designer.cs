@@ -4,6 +4,7 @@ using Hryhoriichuk.University.Instagram.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hryhoriichuk.University.Instagram.Web.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240403081304_UpdateLikesComments")]
+    partial class UpdateLikesComments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,9 +102,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CommentDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("PostId")
                         .HasColumnType("int");
 
@@ -119,7 +119,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comment");
                 });
 
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Follow", b =>
@@ -143,33 +143,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                     b.ToTable("Follows");
                 });
 
-            modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Like", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("LikeDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PostId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Likes");
-                });
-
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Post", b =>
                 {
                     b.Property<int>("Id")
@@ -190,11 +163,9 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Posts");
                 });
@@ -347,7 +318,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                     b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Post");
@@ -372,36 +343,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                     b.Navigation("Followee");
 
                     b.Navigation("Follower");
-                });
-
-            modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Like", b =>
-                {
-                    b.HasOne("Hryhoriichuk.University.Instagram.Web.Models.Post", "Post")
-                        .WithMany("Likes")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Post", b =>
-                {
-                    b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -465,8 +406,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Post", b =>
                 {
                     b.Navigation("Comments");
-
-                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

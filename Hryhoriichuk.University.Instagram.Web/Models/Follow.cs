@@ -11,6 +11,8 @@ namespace Hryhoriichuk.University.Instagram.Web.Models
         public ApplicationUser Followee { get; set; }
 
         // Additional properties if needed
-        public DateTime FollowDate { get; set; }
+        public DateTime? FollowDate { get; set; }
+        public bool IsBlocked { get; set; }
+
     }
 }
