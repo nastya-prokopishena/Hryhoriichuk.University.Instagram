@@ -47,3 +47,11 @@ Add your task decomposition here.
 - Implement media storage using Azure Storage Account
 - Develop backend validation for uploaded media ✔️
 - Write unit tests for media upload functionality
+
+### Week 5:
+- Implement feature: Like and Comment ✔️
+- Add like and comment buttons to feed items ✔️
+- Implement backend logic for handling likes and comments ✔️
+- Design UI for liking and commenting on posts ✔️
+- Write unit tests for like and comment functionalities
+
