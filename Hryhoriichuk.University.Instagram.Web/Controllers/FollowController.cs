@@ -25,37 +25,30 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Follow(string userIdToFollow)
         {
-            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
-            var userToFollow = await _context.Users.FirstOrDefaultAsync(u => u.Id == userIdToFollow);
+            var currentUser = await _userManager.GetUserAsync(User);
+            var userToFollow = await _userManager.FindByIdAsync(userIdToFollow);
 
-            if (currentUser != null && userToFollow != null)
+            if (currentUser == null || userToFollow == null || currentUser.Id == userIdToFollow)
             {
-                if (!currentUser.Followings.Any(f => f.FolloweeId == userIdToFollow))
-                {
-                    var follow = new Follow
-                    {
-                        FollowerId = currentUser.Id,
-                        FolloweeId = userIdToFollow,
-                        FollowDate = DateTime.Now
-                    };
-
-                    _context.Follows.Add(follow);
-                    await _context.SaveChangesAsync();
-                }
+                return NotFound(); // Handle invalid user or attempting to follow oneself
             }
 
-            return RedirectToAction("Index", "Profile", new { username = userToFollow.UserName }); // Redirect to appropriate page
-        }
-
-        // Action to unfollow a user
-        [HttpPost]
-        public async Task<IActionResult> Unfollow(string userIdToUnfollow)
-        {
-            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
-
-            if (currentUser != null)
+            var isAlreadyFollowing = await _context.Follows.AnyAsync(f => f.FollowerId == currentUser.Id && f.FolloweeId == userIdToFollow);
+            if (!isAlreadyFollowing)
             {
-                var follow = await _context.Follows.FirstOrDefaultAsync(f => f.FollowerId == currentUser.Id && f.FolloweeId == userIdToUnfollow);
+                var follow = new Follow
+                {
+                    FollowerId = currentUser.Id,
+                    FolloweeId = userIdToFollow,
+                    FollowDate = DateTime.Now
+                };
+
+                _context.Follows.Add(follow);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                var follow = await _context.Follows.FirstOrDefaultAsync(f => f.FollowerId == currentUser.Id && f.FolloweeId == userIdToFollow);
 
                 if (follow != null)
                 {
@@ -64,7 +57,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 }
             }
 
-            return RedirectToAction("Index", "Profile", new { username = currentUser.UserName }); // Redirect to appropriate page
+            return RedirectToAction("Index", "Profile", new { username = userToFollow.UserName });
         }
     }
 }

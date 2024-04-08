@@ -94,24 +94,22 @@
         else
         {
             <!-- Add elements specific to other users' profiles -->
-            @if (Model.IsFollowing)
-            {
-                <form id="unfollowForm" asp-controller="Follow" asp-action="Unfollow" method="post">
-                    <input type="hidden" name="userIdToUnfollow" value="@Model.Id" />
-                    <button type="submit" id="unfollowButton">Unfollow</button>
-                </form>
-            }
-            else
-            {
-                <form id="followForm" asp-controller="Follow" asp-action="Follow" method="post">
-                    <input type="hidden" name="userIdToFollow" value="@Model.Id" />
-                    <button type="submit" id="followButton">Follow</button>
-                </form>
-            }
+            <form id="followForm" method="post" action="@Url.Action("Follow", "Follow")">
+                <input type="hidden" name="userIdToFollow" value="@Model.Id" />
+                <button type="submit" class="btn btn-primary mt-2">
+                    @if (Model.IsFollowing)
+                    {
+                        <text>Unfollow</text>
+                    }
+                    else
+                    {
+                        <text>Follow</text>
+                    }
+                </button>
+            </form>
         }
     </div>
 </div>
-
 
 <hr />
 
@@ -135,23 +133,4 @@
     {
         <p>No posts found.</p>
     }
-</div>
-
-@if (User.Identity.IsAuthenticated && User.Identity.Name != Model.UserName)
-{
-    @if (Model.IsFollowing)
-    {
-        <form id="unfollowForm" asp-controller="Follow" asp-action="Unfollow" method="post">
-            <input type="hidden" name="userIdToUnfollow" value="@Model.Id" />
-            <button type="submit" id="unfollowButton">Unfollow</button>
-        </form>
-    }
-    else
-    {
-        <form id="followForm" asp-controller="Follow" asp-action="Follow" method="post">
-            <input type="hidden" name="userIdToFollow" value="@Model.Id" />
-            <button type="submit" id="followButton">Follow</button>
-        </form>
-    }
-}
 </div>

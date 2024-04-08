@@ -245,9 +245,10 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
 
             // Check if the currently logged-in user is following this user
             var isFollowing = false;
-            if (currentUser != null && currentUser.Id != user.Id)
+            if (currentUser != null)
             {
-                isFollowing = currentUser.Followings != null && currentUser.Followings.Any(f => f.FolloweeId == user.Id);
+                var follow = await _context.Follows.FirstOrDefaultAsync(f => f.FollowerId == currentUser.Id && f.FolloweeId == user.Id);
+                isFollowing = follow != null;
             }
 
             // Map user information, posts, and following status to Profile model
@@ -264,6 +265,8 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
 
             // Add a flag to indicate whether the current user is viewing their own profile
             ViewData["IsCurrentUserProfile"] = currentUser != null && currentUser.Id == user.Id;
+
+            model.IsFollowing = isFollowing;
 
             return View(model);
         }
