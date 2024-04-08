@@ -270,7 +270,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
 
             return View(model);
         }
-
     }
 
 }

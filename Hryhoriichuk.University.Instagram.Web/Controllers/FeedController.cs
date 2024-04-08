@@ -1,6 +1,7 @@
 ﻿using Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data;
 using Hryhoriichuk.University.Instagram.Web.Data;
 using Hryhoriichuk.University.Instagram.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,37 +21,26 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             _context = context;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> FollowUser(string userIdToFollow)
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            var userToFollow = await _userManager.FindByIdAsync(userIdToFollow);
-
-            if (currentUser != null && userToFollow != null)
-            {
-                // Check if the current user is already following the userToFollow
-                var alreadyFollowing = currentUser.Followings.Any(f => f.FolloweeId == userToFollow.Id);
-                if (!alreadyFollowing)
-                {
-                    var follow = new Follow { FollowerId = currentUser.Id, FolloweeId = userToFollow.Id };
-                    _context.Follows.Add(follow);
-                    await _context.SaveChangesAsync();
-                    return Ok("User followed successfully.");
-                }
-                return BadRequest("User is already followed.");
-            }
-            return BadRequest("User or follower not found.");
-        }
-
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Feed()
         {
             var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser != null)
-            {
-                return View();
-            }
-            return BadRequest("User not found.");
+
+            // Retrieve the list of users the current user follows
+            var followedUsers = await _context.Follows
+                .Where(f => f.FollowerId == currentUser.Id)
+                .Select(f => f.FolloweeId)
+                .ToListAsync();
+
+            // Retrieve posts from followed users
+            var feedPosts = await _context.Posts
+                .Where(p => followedUsers.Contains(p.UserId))
+                .Include(p => p.User) // Include the user who made the post
+                .OrderByDescending(p => p.DatePosted) // Order by date posted (newest first)
+                .ToListAsync();
+
+            return View(feedPosts);
         }
     }
 }

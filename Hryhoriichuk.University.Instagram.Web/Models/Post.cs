@@ -27,5 +27,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Models
             Comments = new HashSet<Comment>();
             Likes = new HashSet<Like>();
         }
+
+        public int LikeCount => Likes.Count;
     }
 }
