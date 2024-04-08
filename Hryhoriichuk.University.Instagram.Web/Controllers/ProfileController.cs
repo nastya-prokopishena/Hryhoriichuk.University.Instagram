@@ -2,6 +2,7 @@
 using Hryhoriichuk.University.Instagram.Web.Data;
 using Hryhoriichuk.University.Instagram.Web.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +14,83 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AuthDbContext _context;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProfileController(UserManager<ApplicationUser> userManager, AuthDbContext context)
+        public ProfileController(UserManager<ApplicationUser> userManager, AuthDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _userManager = userManager;
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UploadProfilePicture(IFormFile ProfilePictureFile)
+        {
+            if (ProfilePictureFile != null && ProfilePictureFile.Length > 0)
+            {
+                try
+                {
+                    // Check file extension and size
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var fileExtension = Path.GetExtension(ProfilePictureFile.FileName).ToLower();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        ModelState.AddModelError("ProfilePictureFile", "Only image files are allowed.");
+                        return RedirectToAction("Index", new { username = User.Identity.Name }); // Redirect to profile page
+                    }
+
+                    var maxFileSize = 5 * 1024 * 1024; // 5 MB
+                    if (ProfilePictureFile.Length > maxFileSize)
+                    {
+                        ModelState.AddModelError("ProfilePictureFile", "Maximum file size exceeded (5 MB).");
+                        return RedirectToAction("Index", new { username = User.Identity.Name }); // Redirect to profile page
+                    }
+
+                    // Generate unique file name
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(ProfilePictureFile.FileName);
+
+                    // Get the path where file will be saved
+                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "profilepictures");
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    // Save the file to the uploads folder
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ProfilePictureFile.CopyToAsync(stream);
+                    }
+
+                    // Get the ID of the currently logged-in user
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                    // Find the user by ID
+                    var user = await _userManager.FindByIdAsync(userId);
+
+                    // Update the user's profile picture path
+                    user.ProfilePicturePath = "/uploads/profilepictures/" + uniqueFileName;
+
+                    // Save changes to the database
+                    await _userManager.UpdateAsync(user);
+
+                    return RedirectToAction("Index", new { username = User.Identity.Name }); // Redirect to profile page
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception
+                    ModelState.AddModelError("ProfilePictureFile", "An error occurred while uploading the file. Please try again.");
+                    return RedirectToAction("Index", new { username = User.Identity.Name }); // Redirect to profile page
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("ProfilePictureFile", "Please select a file to upload.");
+                return RedirectToAction("Index", new { username = User.Identity.Name }); // Redirect to profile page
+            }
+        }
+
+
+
+
 
         [HttpGet]
         [Authorize]
@@ -51,6 +123,9 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             ViewBag.likeCount = likeCount;
             ViewBag.isLiked = isLiked;
 
+            var postUser = await _userManager.FindByIdAsync(post.UserId);
+            var postUserProfilePicturePath = postUser.ProfilePicturePath;
+
             var viewModel = new PostInfo
             {
                 Post = post,
@@ -60,7 +135,9 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                     .Include(c => c.User)
                     .Where(c => c.PostId == postId)
                     .ToListAsync(),
-                CurrentUserLiked = isLiked
+                CurrentUserLiked = isLiked,
+                ProfilePicturePath = postUserProfilePicturePath,
+                UserManager = _userManager
             };
 
 
@@ -150,6 +227,9 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
         [Authorize]
         public async Task<IActionResult> Index(string username)
         {
+            // Get the current user
+            var currentUser = await _userManager.GetUserAsync(User);
+
             // Get the user by username
             var user = await _userManager.FindByNameAsync(username);
 
@@ -164,8 +244,11 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 .ToListAsync();
 
             // Check if the currently logged-in user is following this user
-            var currentUser = await _userManager.GetUserAsync(User);
-            var isFollowing = currentUser != null && currentUser.Followings != null && currentUser.Followings.Any(f => f.FolloweeId == user.Id);
+            var isFollowing = false;
+            if (currentUser != null && currentUser.Id != user.Id)
+            {
+                isFollowing = currentUser.Followings != null && currentUser.Followings.Any(f => f.FolloweeId == user.Id);
+            }
 
             // Map user information, posts, and following status to Profile model
             var model = new Profile
@@ -175,11 +258,16 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 UserName = user.UserName,
                 Email = user.Email,
                 Posts = userPosts, // Assign the user's posts to the model
-                IsFollowing = isFollowing
+                IsFollowing = isFollowing,
+                ProfilePicturePath = user.ProfilePicturePath
             };
+
+            // Add a flag to indicate whether the current user is viewing their own profile
+            ViewData["IsCurrentUserProfile"] = currentUser != null && currentUser.Id == user.Id;
 
             return View(model);
         }
+
     }
 
 }

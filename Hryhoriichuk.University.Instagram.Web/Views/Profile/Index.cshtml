@@ -5,6 +5,38 @@
 }
 
 <style>
+    .profile-container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .profile-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .username {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .full-name {
+        font-size: 18px;
+    }
+
+    .email {
+        font-style: italic;
+    }
+
     .posts-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -47,11 +79,39 @@
     }
 </style>
 
-<div>
-    <p>Full Name:</p> @Model.FullName
-    <p><strong>User Name:</strong> @Model.UserName</p>
-    <p><strong>Email:</strong> @Model.Email</p>
+<div class="profile-container">
+    <img src="@Model.ProfilePicturePath" alt="Profile Picture" class="profile-image" />
+    <div class="profile-info">
+        <div class="username">@Model.UserName</div>
+        <div class="full-name">@Model.FullName</div>
+        <div class="email">@Model.Email</div>
+
+        @if (ViewData["IsCurrentUserProfile"] as bool? == true)
+        {
+            <!-- Add elements specific to the current user's profile -->
+            <a href="#">Edit Profile</a>
+        }
+        else
+        {
+            <!-- Add elements specific to other users' profiles -->
+            @if (Model.IsFollowing)
+            {
+                <form id="unfollowForm" asp-controller="Follow" asp-action="Unfollow" method="post">
+                    <input type="hidden" name="userIdToUnfollow" value="@Model.Id" />
+                    <button type="submit" id="unfollowButton">Unfollow</button>
+                </form>
+            }
+            else
+            {
+                <form id="followForm" asp-controller="Follow" asp-action="Follow" method="post">
+                    <input type="hidden" name="userIdToFollow" value="@Model.Id" />
+                    <button type="submit" id="followButton">Follow</button>
+                </form>
+            }
+        }
+    </div>
 </div>
+
 
 <hr />
 
@@ -69,7 +129,6 @@
                     </a>
                 </div>
             }
-
         </div>
     }
     else
@@ -95,4 +154,4 @@
         </form>
     }
 }
-
+</div>

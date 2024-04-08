@@ -59,10 +59,6 @@ app.MapRazorPages();
 app.MapControllers();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.MapControllerRoute(
     name: "profile",
     pattern: "Profile/{username}",
     defaults: new { controller = "Profile", action = "Index" });
@@ -71,6 +67,11 @@ app.MapControllerRoute(
     name: "follow",
     pattern: "follow/{action}/{id?}",
     defaults: new { controller = "Follow" });
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
 
 app.MapRazorPages();
 

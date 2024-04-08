@@ -33,7 +33,7 @@
                             <a class="nav-link text-dark" asp-area="" asp-page="/WeatherForecast">WeatherForecast</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="MyProfile" asp-action="Index">Profile</a>
+                            <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name">My Profile</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Post" asp-action="UploadMedia">+</a>

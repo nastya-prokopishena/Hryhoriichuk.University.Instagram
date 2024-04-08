@@ -15,10 +15,12 @@ public class ApplicationUser : IdentityUser
     [PersonalData]
     [Column(TypeName = "nvarchar(100)")]
     public string FullName { get; set; }
+    public Profile Profile { get; set; }
 
     // Navigation property for users being followed by this user
     public ICollection<Follow> Followers { get; set; }
 
     // Navigation property for users following this user
     public ICollection<Follow> Followings { get; set; }
+    public string ProfilePicturePath { get; set; }
 }

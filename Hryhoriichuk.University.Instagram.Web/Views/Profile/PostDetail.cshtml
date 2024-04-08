@@ -2,9 +2,11 @@
 
 @{
     Layout = "_Layout";
+    var userManager = Model.UserManager;
 }
 
 <style>
+    /* Add your custom CSS styles here */
     .modal {
         display: none;
         position: fixed;
@@ -38,46 +40,108 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+    .post-container {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        padding: 10px;
+    }
+
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .post-username {
+        margin-left: 10px;
+        font-weight: bold;
+    }
+
+    .post-profile-picture {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .post-image {
+        max-width: 100%;
+        border-radius: 5px;
+    }
+
+    .post-caption {
+        margin-bottom: 10px;
+    }
+
+    .comment-container {
+        margin-top: 20px;
+    }
+
+    .comment {
+        margin-bottom: 10px;
+    }
+
+    .comment-username {
+        font-weight: bold;
+    }
+
+    .comment-input {
+        margin-top: 20px;
+    }
 </style>
 
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <h4><strong>@ViewBag.PostUsername</strong></h4>
-            <img src="@Model.ImagePath" class="img-fluid" alt="Post Image">
-            <p>@Model.Caption</p>
-            <p>Date Posted: @Model.DatePosted.ToShortDateString()</p>
+            <div class="post-container">
+                <div class="post-header">
+                    <img src="@Model.ProfilePicturePath" alt="Profile Picture" class="post-profile-picture">
+                    <span class="post-username">@ViewBag.PostUsername</span>
+                </div>
+                <img src="@Model.ImagePath" class="post-image" alt="Post Image">
+                <p class="post-caption">@Model.Caption</p>
+                <p class="post-date">Date Posted: @Model.DatePosted.ToShortDateString()</p>
 
-            @if (Model.LikeCount > 0)
-            {
-                <div>
-                    <span id="likeCount" class="like-count" style="cursor: pointer;">@Model.LikeCount likes</span>
-                </div>
-                <div id="likersModal" class="modal">
-                    <div class="modal-content">
-                        <span class="close">&times;</span>
-                        <h2>Users who have liked the post</h2>
-                        <ul id="likers">
-                            @foreach (var liker in ViewBag.Likers)
-                            {
-                                <li><a href="/Profile/@liker">@liker</a></li>
-                            }
-                        </ul>
+                @if (Model.LikeCount > 0)
+                {
+                    <div>
+                        <span id="likeCount" class="like-count" style="cursor: pointer;">@Model.LikeCount likes</span>
                     </div>
-                </div>
-            }
-            else
-            {
-                <div>No likes yet.</div>
-            }
+                    <div id="likersModal" class="modal">
+                        <div class="modal-content">
+                            <span class="close">&times;</span>
+                            <h2>Users who have liked the post</h2>
+                            <ul id="likers">
+                                @foreach (var liker in ViewBag.Likers)
+                                {
+                                    var likerUser = await userManager.FindByNameAsync(liker);
+                                    if (likerUser != null)
+                                    {
+                                        <li>
+                                            <img src="@likerUser.ProfilePicturePath" alt="Profile Picture" class="post-profile-picture">
+                                            <a href="/Profile/@liker">@liker</a>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div>No likes yet.</div>
+                }
+            </div>
 
             <!-- Include partial view for displaying likes -->
             @await Html.PartialAsync("_LikesPartial", Model)
 
             <!-- Include partial view for displaying comments -->
-            @await Html.PartialAsync("_CommentsPartial", Model)
-
-            <a asp-action="Index" asp-controller="MyProfile" class="btn btn-primary">Back to My Profile</a>
+            <div class="comment-container">
+                @await Html.PartialAsync("_CommentsPartial", Model)
+            </div>
         </div>
     </div>
 </div>

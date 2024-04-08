@@ -14,6 +14,21 @@
 <div>
     <h2>Change your account settings</h2>
     <hr />
+    <form id="uploadForm" method="post" enctype="multipart/form-data" action="@Url.Action("UploadProfilePicture", "Profile")">
+        <div class="form-group">
+            <label for="ProfilePictureFile">Choose Profile Picture:</label>
+            <input type="file" class="form-control-file" id="ProfilePictureFile" name="ProfilePictureFile">
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+
+    
+    <!-- Preview the selected profile picture -->
+    <div id="previewContainer">
+        <h3>Preview:</h3>
+        <img id="previewImage" src="#" alt="Preview" style="max-width: 200px; max-height: 200px; display: none;" />
+    </div>
+    
     <div class="row">
         <div class="col-md-3">
             <partial name="_ManageNav" />
@@ -26,4 +41,24 @@
 
 @section Scripts {
     @RenderSection("Scripts", required: false)
+
+    <script>
+        // Function to display the preview of the selected profile picture
+        function previewProfilePicture(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                
+                reader.onload = function (e) {
+                    $('#previewImage').attr('src', e.target.result).show();
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // Call the preview function when a file is selected
+        $("#file").change(function () {
+            previewProfilePicture(this);
+        });
+    </script>
 }

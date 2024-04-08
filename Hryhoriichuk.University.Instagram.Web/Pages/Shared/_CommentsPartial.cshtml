@@ -17,9 +17,11 @@
             </li>
         }
     </ul>
-    <form id="commentForm" asp-controller="Profile" asp-action="AddComment" method="post">
-        <input type="hidden" name="postId" value="@Model.Post.Id" />
-        <textarea name="commentText"></textarea>
-        <button type="submit">Add Comment</button>
-    </form>
+    <div class="comment-input">
+        <form asp-action="AddComment" asp-controller="Profile">
+            <input type="hidden" name="postId" value="@Model.Post.Id">
+            <textarea class="form-control" name="commentText" rows="3" placeholder="Add a comment"></textarea>
+            <button type="submit" class="btn btn-primary mt-2">Comment</button>
+        </form>
+    </div>
 </div>
