@@ -12,10 +12,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-
-    defaults:
-      run:
-        working-directory: ./Hryhoriichuk.University.Instagram.Web
     
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +26,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish ./Hryhoriichuk.University.Instagram.Web/Hryhoriichuk.University.Instagram.Web.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
