@@ -3,10 +3,6 @@
 
 name: Build and deploy ASP.Net Core app to Azure Web App - instbyden
 
-defaults:
-  run:
-    working-directory: ./Hryhoriichuk.University.Instagram.Web
-
 on:
   push:
     branches:
@@ -17,6 +13,10 @@ jobs:
   build:
     runs-on: windows-latest
 
+    defaults:
+      run:
+        working-directory: ./Hryhoriichuk.University.Instagram.Web
+    
     steps:
       - uses: actions/checkout@v4
 
@@ -30,10 +30,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: |
-          cd Hryhoriichuk.University.Instagram.Web
-          dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
-
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
