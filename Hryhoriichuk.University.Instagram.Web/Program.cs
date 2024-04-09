@@ -46,8 +46,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.MapGet("/", () => "Hello World!");
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -55,7 +53,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapRazorPages();
 app.MapControllers();
 
 app.MapControllerRoute(
