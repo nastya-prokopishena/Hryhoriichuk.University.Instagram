@@ -63,8 +63,3 @@ jobs:
           app-name: 'instbyden'
           slot-name: 'Production'
           package: .
-          
-      - name: Run startup command
-        run: |
-          cd ${{env.DOTNET_ROOT}}/myapp
-          dotnet Hryhoriichuk.University.Instagram.Web.dll
