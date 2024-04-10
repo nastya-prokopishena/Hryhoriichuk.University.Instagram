@@ -131,11 +131,11 @@ namespace Hryhoriichuk.University.Instagram.Web.Areas.Identity.Pages.Account
                 var user = CreateUser();
 
                 user.FullName = Input.FullName;
+                user.ProfilePicturePath = "https://i.pinimg.com/736x/0d/64/98/0d64989794b1a4c9d89bff571d3d5842.jpg";
                 await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
                 // Set the default profile picture path
-                user.ProfilePicturePath = "/default-profile-picture/default-profile.jpg";
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
 

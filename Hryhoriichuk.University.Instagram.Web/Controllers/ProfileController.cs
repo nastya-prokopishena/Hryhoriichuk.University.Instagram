@@ -89,9 +89,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
         }
 
 
-
-
-
         [HttpGet]
         [Authorize]
         [Route("Profile/{username}/{postId}")]
@@ -270,6 +267,42 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
 
             return View(model);
         }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Explore()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            // Get all posts
+            var allPosts = await _context.Posts.Include(p => p.User).ToListAsync();
+
+            // Define weights for likes and comments
+            const double likeWeight = 1.0;
+            const double commentWeight = 2.0; // Assuming comments are more engaging than likes
+
+            // Calculate followerScore for each post
+            var postsWithScores = allPosts.Select(post =>
+            {
+                var likeCount = _context.Likes.Count(l => l.PostId == post.Id);
+                var commentCount = _context.Comments.Count(c => c.PostId == post.Id);
+                var interactions = (likeWeight * likeCount) + (commentWeight * commentCount);
+                var followerCount = _context.Follows.Count(f => f.FolloweeId == post.User.Id);
+                var followerScore = followerCount > 0 ? interactions * followerCount : 1;
+
+                return new
+                {
+                    Post = post,
+                    FollowerScore = followerScore
+                };
+            });
+
+            // Sort posts by followerScore in descending order
+            var sortedPosts = postsWithScores.OrderByDescending(p => p.FollowerScore).Select(p => p.Post);
+
+            return View(sortedPosts);
+        }
+
     }
 
 }
