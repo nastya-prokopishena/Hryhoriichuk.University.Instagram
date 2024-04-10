@@ -22,7 +22,7 @@ Add your task decomposition here.
 
 ### Week 1:
 - Implement feature: User Registration ✔️
-- Set up Azure SQL Database 
+- Set up Azure SQL Database ✔️
 - Configure OAuth 2.0 with Google for user authentication ✔️
 - Create basic project structure ✔️
 - Set up Continuous Integration/Continuous Delivery pipeline ✔️
@@ -30,7 +30,7 @@ Add your task decomposition here.
 ### Week 2:
 - Implement feature: User Profile ✔️
 - Set up Entity Framework for database interaction ✔️
-- Design and implement user profile UI
+- Design and implement user profile UI ✔️
 - Integrate Google account authorization ✔️
 - Create unit tests for user registration and profile functionalities
 
@@ -55,3 +55,9 @@ Add your task decomposition here.
 - Design UI for liking and commenting on posts ✔️
 - Write unit tests for like and comment functionalities
 
+### Week 6:
+- Implement feature: Explore Page
+- Design and implement UI for displaying trending content
+- Develop algorithms for selecting trending posts
+- Integrate trending content into the explore page
+- Write unit tests for explore page functionalities
