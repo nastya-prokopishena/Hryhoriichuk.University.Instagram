@@ -30,7 +30,10 @@
                             <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/WeatherForecast">WeatherForecast</a>
+                            <a class="nav-link text-dark" asp-controller="Feed" asp-action="Feed">Feed</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/Explore">Explore</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name">My Profile</a>

@@ -10,10 +10,15 @@
         margin-top: 20px;
     }
 
+    .post-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 20px;
+    }
+
     .post-container {
         border: 1px solid #ddd;
         border-radius: 5px;
-        margin-bottom: 20px;
         padding: 10px;
     }
 
@@ -23,101 +28,53 @@
         margin-bottom: 10px;
     }
 
-    .post-username {
-        margin-left: 10px;
-        font-weight: bold;
-    }
-
     .post-profile-picture {
         width: 30px;
         height: 30px;
         border-radius: 50%;
         object-fit: cover;
+        margin-right: 10px;
+    }
+
+    .post-username {
+        font-weight: bold;
     }
 
     .post-image {
         max-width: 100%;
         border-radius: 5px;
+        cursor: pointer;
     }
 
     .post-caption {
-        margin-bottom: 10px;
-    }
-
-    .post-date {
-        font-style: italic;
-    }
-
-    .comment-container {
-        margin-top: 20px;
-    }
-
-    .comment {
-        margin-bottom: 10px;
-    }
-
-    .comment-username {
-        font-weight: bold;
-    }
-
-    .comment-input {
-        margin-top: 20px;
-        width: 100%;
+        margin-top: 10px;
     }
 </style>
 
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            @if (Model.Count() == 0)
-            {
-                <div>No posts available.</div>
-            }
-            else
-            {
-                @foreach (var post in Model)
-                {
-                    <div class="post-container">
-                        <!-- Post Header -->
-                        <div class="post-header">
-                            <img src="@post.User.ProfilePicturePath" alt="Profile Picture" class="post-profile-picture">
-                            <span class="post-username">@post.User.UserName</span>
-                        </div>
-                        <!-- Post Image -->
-                        <img src="@post.ImagePath" class="post-image" alt="Post Image">
-                        <!-- Post Caption -->
-                        <p class="post-caption">@post.Caption</p>
-                        <!-- Post Date -->
-                        <p class="post-date">Date Posted: @post.DatePosted.ToShortDateString()</p>
-                        <!-- Like Button -->
-                        <form class="like-form">
-                            <input type="hidden" name="postId" value="@post.Id" />
-                            <button type="button" class="like-button btn btn-primary">Like</button>
-                            <span class="like-count">@post.LikeCount</span> likes
-                        </form>
-                        <!-- Comments Section -->
-                        <div class="comment-container">
-                            <!-- Display comments for the post -->
-                            @foreach (var comment in post.Comments)
-                            {
-                                <div class="comment">
-                                    <span class="comment-username">@comment.User.UserName:</span> @comment.Text
-                                </div>
-                            }
-                            <!-- Add a form for adding comments -->
-                            <form class="comment-form">
-                                <input type="hidden" name="postId" value="@post.Id" />
-                                <textarea name="commentText" class="comment-input" placeholder="Add a comment"></textarea>
-                                <button type="button" class="post-comment-button btn btn-primary">Post Comment</button>
-                            </form>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
+    <div class="post-grid">
+        @foreach (var post in Model)
+        {
+            <div class="post-container">
+                <div class="post-header">
+                    <img src="@post.User.ProfilePicturePath" class="post-profile-picture" alt="Profile Picture">
+                    <span class="post-username">@post.User.UserName</span>
+                </div>
+                <img src="@post.ImagePath" class="post-image" alt="Post Image" data-username="@post.User.UserName" data-post-id="@post.Id">
+                <p class="post-caption">@post.Caption</p>
+            </div>
+        }
     </div>
 </div>
 
 @section scripts {
-    <!-- Add your JavaScript scripts here -->
+    <script>
+        // Add JavaScript code here to handle post click event
+        $(".post-image").click(function () {
+            var postId = $(this).data("post-id");
+            var username = $(this).data("username");
+            var url = "/Profile/" + username + "/" + postId;
+            window.location.href = url;
+        });
+    </script>
 }

@@ -270,6 +270,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
 
         [HttpGet]
         [Authorize]
+        [Route("Explore")]
         public async Task<IActionResult> Explore()
         {
             var currentUser = await _userManager.GetUserAsync(User);
