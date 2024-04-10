@@ -56,8 +56,8 @@ Add your task decomposition here.
 - Write unit tests for like and comment functionalities
 
 ### Week 6:
-- Implement feature: Explore Page
-- Design and implement UI for displaying trending content
-- Develop algorithms for selecting trending posts
-- Integrate trending content into the explore page
+- Implement feature: Explore Page ✔️
+- Design and implement UI for displaying trending content ✔️
+- Develop algorithms for selecting trending posts ✔️
+- Integrate trending content into the explore page ✔️
 - Write unit tests for explore page functionalities
