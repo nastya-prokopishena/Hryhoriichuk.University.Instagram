@@ -8,14 +8,14 @@
 <form id="likeForm" method="post" action="@Url.Action("ToggleLike", "Profile")">
     <div class="mb-3">
         <input type="hidden" name="postId" value="@Model.Id" />
-        <button type="submit" class="btn btn-primary me-3" id="likeButton">
+        <button type="submit" class="btn" id="likeButton">
             @if (@isLiked)
             {
-                <text>Unlike</text>
+                <i class="bi bi-heart-fill" style="color:red;"> </i>
             }
             else
             {
-                <text>Like</text>
+                <i class="bi bi-heart fa-7x"></i>
             }
         </button>
     </div>
