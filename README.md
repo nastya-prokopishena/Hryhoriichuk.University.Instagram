@@ -61,3 +61,10 @@ Add your task decomposition here.
 - Develop algorithms for selecting trending posts ✔️
 - Integrate trending content into the explore page ✔️
 - Write unit tests for explore page functionalities
+
+### Week 7:
+- Implement feature: Direct Messaging ✔️
+- Design UI for direct messaging interface ✔️
+- Develop backend logic for sending and receiving messages ✔️
+- Integrate messaging functionality with user profiles ✔️
+- Write unit tests for direct messaging functionalities
