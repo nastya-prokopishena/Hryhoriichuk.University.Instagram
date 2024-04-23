@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "Chat Demo";
+    Layout = "_Layout";
+}
+
+<h1>Chat Demo</h1>
+
+<div class="container">
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-2">User</div>
+        <div class="col-4"><input type="text" id="txtUser" /></div>
+    </div>
+    <div class="row">&nbsp;</div>
+    <div class="row">
+        <div class="col-2">Message</div>
+        <div class="col-4">
+            <textarea id="txtMessage" rows="2" style="width:100%;"></textarea>
+        </div>
+        <div class="col-6">
+            <input type="button" id="btnSendMessage" value="Send Message" />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <hr />
+    </div>
+</div>
+<div class="row">
+    <div class="col-6">
+        <ul id="messagesList"></ul>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script>
+        "use strict";
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+        //Disable the send button until connection is established.
+        $('#btnSendMessage').prop('disabled', true);
+
+        connection.start().then(function () {
+            $('#btnSendMessage').prop('disabled', false);
+            alert('Connected to ChatHub');
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        $('#btnSendMessage').click(function (e) {
+            var user = $("#txtUser").val();
+            var message = $("#txtMessage").val();
+            connection.invoke("SendMessage", user, message).catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            // clear message input
+            $("#txtMessage").val('');
+
+            // focus again to textbox
+            $("#txtMessage").focus();
+
+            e.preventDefault();
+        });
+
+        connection.on("ReceiveMessage", function (senderId, message) {
+            var content = `<b>${senderId} - </b>${message}`;
+            $('#messagesList').append(`<li>${content}</li>`);
+        });
+    </script>
+}

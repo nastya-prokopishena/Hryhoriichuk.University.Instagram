@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Hryhoriichuk.University.Instagram.Web.Controllers
 {
@@ -262,6 +263,14 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
 
             // Add a flag to indicate whether the current user is viewing their own profile
             ViewData["IsCurrentUserProfile"] = currentUser != null && currentUser.Id == user.Id;
+
+            var followersCount = await _context.Follows.CountAsync(f => f.FolloweeId == user.Id);
+
+            // Compute followings count
+            var followingsCount = await _context.Follows.CountAsync(f => f.FollowerId == user.Id);
+
+            ViewData["FollowersCount"] = followersCount;
+            ViewData["FollowingsCount"] = followingsCount;
 
             model.IsFollowing = isFollowing;
 

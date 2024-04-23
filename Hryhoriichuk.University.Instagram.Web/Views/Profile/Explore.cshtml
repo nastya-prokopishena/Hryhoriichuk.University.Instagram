@@ -38,6 +38,8 @@
 
     .post-username {
         font-weight: bold;
+        color: inherit; /* Inherit the color from the parent */
+        text-decoration: none; /* Remove underline */
     }
 
     .post-image {
@@ -58,7 +60,7 @@
             <div class="post-container">
                 <div class="post-header">
                     <img src="@post.User.ProfilePicturePath" class="post-profile-picture" alt="Profile Picture">
-                    <span class="post-username">@post.User.UserName</span>
+                    <a href="/Profile/@post.User.UserName" class="post-username">@post.User.UserName</a>
                 </div>
                 <img src="@post.ImagePath" class="post-image" alt="Post Image" data-username="@post.User.UserName" data-post-id="@post.Id">
                 <p class="post-caption">@post.Caption</p>

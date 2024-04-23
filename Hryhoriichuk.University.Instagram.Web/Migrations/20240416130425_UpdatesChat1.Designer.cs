@@ -4,6 +4,7 @@ using Hryhoriichuk.University.Instagram.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hryhoriichuk.University.Instagram.Web.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240416130425_UpdatesChat1")]
+    partial class UpdatesChat1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -191,22 +194,28 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("FromUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("ReceiverId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SenderId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ToUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ReceiverId");
+                    b.HasIndex("FromUserId");
 
-                    b.HasIndex("SenderId");
+                    b.HasIndex("ToUserId");
 
                     b.ToTable("Messages");
                 });
@@ -486,21 +495,17 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
 
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Message", b =>
                 {
-                    b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "Receiver")
+                    b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "FromUser")
                         .WithMany()
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("FromUserId");
 
-                    b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "Sender")
+                    b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "ToUser")
                         .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("ToUserId");
 
-                    b.Navigation("Receiver");
+                    b.Navigation("FromUser");
 
-                    b.Navigation("Sender");
+                    b.Navigation("ToUser");
                 });
 
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Post", b =>

@@ -26,6 +26,8 @@ builder.Services.RegisterCoreDependencies();
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 
+builder.Services.AddSignalR();
+
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.Password.RequireUppercase = false;
@@ -71,6 +73,7 @@ app.MapControllerRoute(
 
 
 app.MapRazorPages();
+app.MapHub<ChatHub>("/chatHub");
 
 app.UseSwagger();
 app.UseSwaggerUI();

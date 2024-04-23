@@ -85,6 +85,21 @@
         <div class="username">@Model.UserName</div>
         <div class="full-name">@Model.FullName</div>
         <div class="email">@Model.Email</div>
+        <div>
+            <span class="followers-count" data-type="followers">@ViewBag.FollowersCount followers</span> |
+            <span class="followings-count" data-type="followings">@ViewBag.FollowingsCount followings</span>
+        </div>
+
+        <div id="followerFollowingModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Followers and Followings</h2>
+                <div id="followersFollowingsList">
+                    <!-- Followers/Followings list will be added dynamically here -->
+                </div>
+            </div>
+        </div>
+
 
         @if (ViewData["IsCurrentUserProfile"] as bool? == true)
         {
@@ -93,6 +108,10 @@
         }
         else
         {
+            <form id="messageForm" method="post" action="@Url.Action("NewChat", "Message")">
+                <input type="hidden" name="username" value="@Model.UserName" />
+                <button type="submit" class="btn btn-primary mt-2">Message</button>
+            </form>
             <!-- Add elements specific to other users' profiles -->
             <form id="followForm" method="post" action="@Url.Action("Follow", "Follow")">
                 <input type="hidden" name="userIdToFollow" value="@Model.Id" />

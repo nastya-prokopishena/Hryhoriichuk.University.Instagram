@@ -1,0 +1,27 @@
+﻿@{
+    ViewData["Title"] = "Chat Tab";
+    Layout = "_Layout";
+}
+
+<h1>Chat Tab</h1>
+
+<h2>Start New Chat</h2>
+<form asp-controller="Message" asp-action="Chat" method="get">
+    <label for="selectedUser">Select a user to start chatting with:</label>
+    <select id="selectedUser" name="receiverId">
+        <option value="">-- Select User --</option>
+        @foreach (var user in ViewBag.Users)
+        {
+            <option value="@user.Id">@user.UserName</option>
+        }
+    </select>
+    <button type="submit">Start Chat</button>
+</form>
+
+<h2>Recent Chats</h2>
+<ul>
+    @foreach (var chat in ViewBag.Chats)
+    {
+        <li><a href="@Url.Action("Chat", "Message", new { receiverId = chat })">Chat with @chat</a></li>
+    }
+</ul>

@@ -1,0 +1,78 @@
+﻿@using Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data
+
+@{
+    ViewData["Title"] = "Chat";
+    Layout = "_Layout";
+}
+
+<h1>Chat</h1>
+
+<ul>
+    @foreach (var user in Model)
+    {
+        <li>
+            <a asp-controller="Message" asp-action="Chat" asp-route-username="@user.UserName">@user.UserName</a>
+        </li>
+    }
+</ul>
+
+<a asp-controller="Message" asp-action="NewChat">Start New Chat</a>
+
+<div class="message-history" style="display: none;">
+    <h2>Message History</h2>
+    <div id="message-history"></div>
+    <textarea id="new-message" rows="3"></textarea>
+    <button id="send-message">Send</button>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/path/to/signalr.js"></script>
+    <script>
+        $(document).ready(function () {
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("/chatHub")
+                .build();
+
+            connection.start().then(function () {
+                console.log("SignalR Connected.");
+            }).catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            $(".load-messages").on("click", function (e) {
+                e.preventDefault();
+                var userId = $(this).data("user-id");
+
+                connection.invoke("GetPreviousMessages", userId)
+                    .then(function (messages) {
+                        $("#message-history").empty();
+                        messages.forEach(function (message) {
+                            $("#message-history").append("<div><strong>" + message.senderId + ": </strong>" + message.content + "</div>");
+                        });
+                    })
+                    .catch(function (err) {
+                        return console.error(err.toString());
+                    });
+
+                $(".message-history").show();
+            });
+
+            $("#send-message").on("click", function () {
+                var userId = $(".load-messages").data("user-id");
+                var message = $("#new-message").val();
+
+                connection.invoke("SendMessage", userId, message)
+                    .catch(function (err) {
+                        return console.error(err.toString());
+                    });
+
+                $("#new-message").val("");
+            });
+
+            connection.on("ReceiveMessage", function (senderId, message) {
+                $("#message-history").append("<div><strong>" + senderId + ": </strong>" + message + "</div>");
+            });
+        });
+    </script>
+}

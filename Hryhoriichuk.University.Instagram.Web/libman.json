@@ -2063,6 +2063,15 @@
         "icons/zoom-in.svg",
         "icons/zoom-out.svg"
       ]
+    },
+    {
+      "provider": "unpkg",
+      "library": "@microsoft/signalr@latest",
+      "destination": "wwwroot/lib/microsoft/signalr/",
+      "files": [
+        "dist/browser/signalr.js",
+        "dist/browser/signalr.min.js"
+      ]
     }
   ]
 }

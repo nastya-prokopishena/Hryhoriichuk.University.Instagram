@@ -19,10 +19,25 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<Follow> Follows { get; set; }
+    public DbSet<Message> Messages { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
         // Configure the many-to-many relationship for following/followers
+
+        builder.Entity<Message>()
+        .HasOne(m => m.Sender)
+        .WithMany()
+        .HasForeignKey(m => m.SenderId)
+        .IsRequired()
+        .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Message>()
+            .HasOne(m => m.Receiver)
+            .WithMany()
+            .HasForeignKey(m => m.ReceiverId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<Follow>()
                 .HasKey(f => new { f.FollowerId, f.FolloweeId });
