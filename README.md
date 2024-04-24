@@ -68,3 +68,10 @@ Add your task decomposition here.
 - Develop backend logic for sending and receiving messages ✔️
 - Integrate messaging functionality with user profiles ✔️
 - Write unit tests for direct messaging functionalities
+
+### Week 8:
+- Implement feature: Notifications ✔️
+- Design UI for displaying notifications ✔️
+- Develop backend logic for generating notifications ✔️
+- Implement real-time notification updates using Azure Service Bus
+- Write unit tests for notification functionalities
