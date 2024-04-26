@@ -20,6 +20,7 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Post> Posts { get; set; }
     public DbSet<Follow> Follows { get; set; }
     public DbSet<Message> Messages { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -67,6 +68,22 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(c => c.UserId)
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Notification>()
+        .HasOne(n => n.UserTriggered)
+        .WithMany()
+        .HasForeignKey(n => n.UserIdTriggered)
+        .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Notification>()
+            .HasOne(n => n.UserReceived)
+            .WithMany()
+            .HasForeignKey(n => n.UserIdReceived)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Notification>()
+                .Property(n => n.PostId)
+                .IsRequired(false);
 
     }
 }

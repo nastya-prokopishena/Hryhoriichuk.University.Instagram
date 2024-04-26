@@ -1,0 +1,117 @@
+﻿@model List<Hryhoriichuk.University.Instagram.Web.Models.Notification>
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    /* Add your custom CSS styles for the notifications menu */
+    .dropdown-menu {
+        min-width: 20rem;
+        max-height: 400px; /* Set max height for dropdown menu */
+        overflow-y: auto; /* Enable vertical scrolling */
+        border: none;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add shadow effect */
+        padding: 0; /* Remove default padding */
+    }
+
+    .notification-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        cursor: pointer; /* Add cursor pointer to indicate clickability */
+    }
+
+    .notification-icon {
+        margin-right: 10px;
+    }
+
+    .notification-text {
+        color: inherit; /* Inherit the color from the parent */
+        text-decoration: none; /* Set text color to black */
+    }
+
+    .notification-username {
+        font-weight: bold; /* Make username bold */
+    }
+
+    .notification-timestamp {
+        margin-left: auto;
+    }
+
+    .profile-picture {
+        width: 30px; /* Adjust the width as needed */
+        height: 30px; /* Adjust the height as needed */
+        border-radius: 50%; /* Make the image round */
+        object-fit: cover; /* Maintain aspect ratio */
+        margin-right: 10px; /* Add some margin for spacing */
+    }
+
+    .post-icon {
+        width: 50px; /* Adjust the width as needed */
+        height: 50px; /* Adjust the height as needed */
+        margin-right: 10px; /* Add some margin for spacing */
+    }
+</style>
+
+<div class="dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" aria-haspopup="true" aria-expanded="false" data-bs-toggle="dropdown">
+        Notifications
+    </a>
+    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var notification in Model)
+            {
+                <div class="notification-item" onclick="redirectToPost('@notification.PostId')">
+                    @if (notification.NotificationType == "Like")
+                    {
+                        <i class="bi bi-heart notification-icon text-danger"></i>
+                        <div class="notification-text">
+                            <a class="notification-text" href="@Url.Action("PostDetail", "Profile", new { username = notification.UserTriggered.UserName, postId = notification.PostId })">
+                                <img src="@notification.UserTriggered.ProfilePicturePath" alt="Profile Picture" class="profile-picture">
+                                <span class="notification-username">@notification.UserTriggered.UserName</span> @notification.Message
+                                <img src="@notification.Post.ImagePath" alt="Post Icon" class="post-icon">
+                            </a>
+                        </div>
+                        <div class="notification-timestamp">
+                            <span class="badge badge-primary">@notification.Timestamp.ToString("mm")</span>
+                        </div>
+                    }
+                    else if (notification.NotificationType == "Comment")
+                    {
+                        <i class="bi bi-chat-dots notification-icon text-primary"></i>
+                        <div class="notification-text">
+                            <a class="notification-text" href="@Url.Action("PostDetail", "Profile", new { username = notification.UserTriggered.UserName, postId = notification.PostId })">
+                                <img src="@notification.UserTriggered.ProfilePicturePath" alt="Profile Picture" class="profile-picture">
+                                <span class="notification-username">@notification.UserTriggered.UserName</span> @notification.Message
+                                <img src="@notification.Post.ImagePath" alt="Post Icon" class="post-icon">
+                            </a>
+                        </div>
+                        <div class="notification-timestamp">
+                            <span class="badge badge-primary">@notification.Timestamp.ToString("mm")</span>
+                        </div>
+                    }
+                    else if (notification.NotificationType == "Follow")
+                    {
+                        <i class="bi bi-person-plus notification-icon text-success"></i>
+                        <div class="notification-text">
+                            <a class="notification-text" href="@Url.Action("Index", "Profile", new { username = notification.UserTriggered.UserName })">
+                                <img src="@notification.UserTriggered.ProfilePicturePath" alt="Profile Picture" class="profile-picture">
+                                <span class="notification-username">@notification.UserTriggered.UserName</span> @notification.Message
+                            </a>
+                        </div>
+                        <div class="notification-timestamp">
+                            <span class="badge badge-primary">@notification.Timestamp.ToString("mm")</span>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <p class="dropdown-item-text">No notifications</p>
+        }
+    </div>
+</div>

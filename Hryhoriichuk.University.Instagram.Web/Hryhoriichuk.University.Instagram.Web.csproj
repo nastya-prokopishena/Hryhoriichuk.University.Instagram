@@ -43,7 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Views\MyProfile\PostDetail\PostDetail.cshtml" />
     <None Include="web.config" />
   </ItemGroup>
 

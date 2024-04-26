@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Hryhoriichuk.University.Instagram.Web.Data;
 using Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data;
+using Hryhoriichuk.University.Instagram.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("AuthDbContextConnection") ?? throw new InvalidOperationException("Connection string 'AuthDbContextConnection' not found.");
@@ -37,6 +38,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+services.AddScoped<INotificationService, NotificationService>();
 
 var app = builder.Build();
 

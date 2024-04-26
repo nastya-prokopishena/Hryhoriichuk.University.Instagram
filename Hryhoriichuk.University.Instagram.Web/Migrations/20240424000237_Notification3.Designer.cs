@@ -4,6 +4,7 @@ using Hryhoriichuk.University.Instagram.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hryhoriichuk.University.Instagram.Web.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240424000237_Notification3")]
+    partial class Notification3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -231,6 +234,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PostId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<DateTime>("ReadTimestamp")
@@ -554,7 +558,9 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                 {
                     b.HasOne("Hryhoriichuk.University.Instagram.Web.Models.Post", "Post")
                         .WithMany()
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "UserReceived")
                         .WithMany()

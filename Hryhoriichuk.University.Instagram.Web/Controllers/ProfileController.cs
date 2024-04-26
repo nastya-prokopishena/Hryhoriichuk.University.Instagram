@@ -1,6 +1,7 @@
 ﻿using Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data;
 using Hryhoriichuk.University.Instagram.Web.Data;
 using Hryhoriichuk.University.Instagram.Web.Models;
+using Hryhoriichuk.University.Instagram.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -16,12 +17,14 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AuthDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly INotificationService _notificationService;
 
-        public ProfileController(UserManager<ApplicationUser> userManager, AuthDbContext context, IWebHostEnvironment webHostEnvironment)
+        public ProfileController(UserManager<ApplicationUser> userManager, AuthDbContext context, IWebHostEnvironment webHostEnvironment, INotificationService notificationService)
         {
             _userManager = userManager;
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _notificationService = notificationService;
         }
 
         [HttpPost]
@@ -157,17 +160,20 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 return NotFound();
             }
 
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             // Create a new comment
             var comment = new Comment
             {
                 PostId = postId,
-                UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value, // Get the user's ID from claims
+                UserId = userId, // Get the user's ID from claims
                 Text = commentText,
                 CommentDate = DateTime.Now // You might want to adjust this according to your requirements
             };
 
             // Add the comment to the database
             _context.Comments.Add(comment);
+            await _notificationService.CreateNotificationAsync("Comment", userId, post.UserId, postId);
             await _context.SaveChangesAsync();
 
             // Redirect back to the post detail page
@@ -197,6 +203,16 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             {
                 // User has already liked the post, so unlike it
                 _context.Likes.Remove(existingLike);
+
+                var existingNotification = await _context.Notifications.FirstOrDefaultAsync(n =>
+                    n.NotificationType == "Like" &&
+                    n.UserIdTriggered == currentUser.Id &&
+                    n.PostId == postId);
+
+                if (existingNotification != null)
+                {
+                    _context.Notifications.Remove(existingNotification);
+                }
             }
             else
             {
@@ -208,6 +224,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                     LikeDate = DateTime.Now, // You might want to adjust this according to your requirements
                 };
                 _context.Likes.Add(like);
+                await _notificationService.CreateNotificationAsync("Like", currentUser.Id, post.UserId, postId);
             }
 
             // Save changes to the database
@@ -225,9 +242,13 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
         [Authorize]
         public async Task<IActionResult> Index(string username)
         {
+
             // Get the current user
             var currentUser = await _userManager.GetUserAsync(User);
 
+            int? unreadNotificationsCount = await _notificationService.GetUnreadNotificationsCount(currentUser.Id);
+
+            ViewData["unreadNotificationsCount"] = unreadNotificationsCount;
             // Get the user by username
             var user = await _userManager.FindByNameAsync(username);
 

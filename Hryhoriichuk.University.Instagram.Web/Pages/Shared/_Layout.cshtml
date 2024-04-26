@@ -44,6 +44,16 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Post" asp-action="UploadMedia">+</a>
                         </li>
+                        <li>
+                            <button class="btn btn-outline-primary" onclick="location.href='@Url.Action("Index", "Notification")'">
+                                <i class="bi bi-bell"></i>
+                                @if (ViewData["unreadNotificationsCount"] != null)
+                                {
+                                    <span class="badge badge-pill badge-danger" style="color: red;">@ViewData["unreadNotificationsCount"]</span>
+                                }
+                            </button>
+                        </li>
+
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>
