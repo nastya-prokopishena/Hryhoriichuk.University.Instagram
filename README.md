@@ -75,3 +75,10 @@ Add your task decomposition here.
 - Develop backend logic for generating notifications ✔️
 - Implement real-time notification updates using Azure Service Bus
 - Write unit tests for notification functionalities
+
+### Week 9:
+- Implement feature: Search Functionality ✔️
+- Design UI for search bar and search results ✔️
+- Develop backend logic for searching users, hashtags, and posts ✔️
+- Integrate search functionality with user interface ✔️
+- Write unit tests for search functionalities
