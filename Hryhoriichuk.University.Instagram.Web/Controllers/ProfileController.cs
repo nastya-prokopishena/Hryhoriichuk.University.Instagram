@@ -127,6 +127,8 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             var postUser = await _userManager.FindByIdAsync(post.UserId);
             var postUserProfilePicturePath = postUser.ProfilePicturePath;
 
+            ViewData["IsCurrentUserProfile"] = currentUser != null && currentUser.Id == user.Id;
+
             var viewModel = new PostInfo
             {
                 Post = post,
@@ -237,6 +239,88 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             return RedirectToAction("PostDetail", new { username = user.UserName, postId = postId});
         }
 
+        [HttpPost]
+        [Authorize]
+        [Route("Profile/DeletePost")]
+        public async Task<IActionResult> DeletePost(int postId)
+        {
+            var post = await _context.Posts.FindAsync(postId);
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            // Check authorization
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (post.UserId != currentUser.Id)
+            {
+                return Forbid(); // User is not authorized to delete this post
+            }
+
+            // Delete related likes, comments, and notifications
+            _context.Likes.RemoveRange(_context.Likes.Where(l => l.PostId == postId));
+            _context.Comments.RemoveRange(_context.Comments.Where(c => c.PostId == postId));
+            _context.Notifications.RemoveRange(_context.Notifications.Where(n => n.PostId == postId));
+
+            // Delete the post
+            _context.Posts.Remove(post);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", new { username = currentUser.UserName });
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("Profile/EditCaption")]
+        public async Task<IActionResult> EditCaption(int postId, string captionText)
+        {
+            var post = await _context.Posts.FindAsync(postId);
+            if (post == null)
+            {
+                return NotFound();
+            }
+
+            // Check authorization
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (post.UserId != currentUser.Id)
+            {
+                return Forbid(); // User is not authorized to edit this post
+            }
+
+            // Update the caption
+            post.Caption = captionText;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("PostDetail", new { username = post.User.UserName, postId = postId });
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("Explore/Hashtag/{hashtag}")]
+        public async Task<IActionResult> PostsByHashtag(string hashtag)
+        {
+            // Retrieve posts containing the hashtag
+            var posts = await _context.Posts
+                .Where(p => p.Caption.Contains(hashtag))
+                .Include(p => p.User) // Include the User navigation property to access user details
+                .ToListAsync();
+
+            // Convert posts to PostInfo objects
+            var postInfos = posts.Select(post => new PostInfo
+            {
+                Post = post,
+                User = post.User,
+
+                // You may need to populate other properties like IsLiked, LikeCount, Likers, Comments, etc.
+            }).ToList();
+
+            // Pass the hashtag and postInfos to the view
+            ViewBag.Hashtag = hashtag;
+
+            return View(postInfos);
+        }
+
+
 
         [HttpGet]
         [Authorize]
@@ -333,6 +417,61 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
 
             return View(sortedPosts);
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("Search")]
+        public async Task<IActionResult> Search(string query)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                // If the query is empty, return an empty result
+                var emptyModel = new SearchViewModel
+                {
+                    Query = query,
+                    Users = new List<ApplicationUser>(),
+                    Hashtags = new List<string>(),
+                    HashtagCounts = new Dictionary<string, int>()
+                };
+                return PartialView("_SearchResults", emptyModel);
+            }
+
+            // Perform search logic to find users and hashtags by the query string
+            var usersStartingWithQuery = await _userManager.Users
+                .Where(u => u.UserName.StartsWith(query))
+                .ToListAsync();
+
+            var usersContainingQuery = await _userManager.Users
+                .Where(u => u.UserName.Contains(query) && !u.UserName.StartsWith(query))
+                .ToListAsync();
+
+            // Extract the hashtag from the query
+            // Check if the query starts with "#" and remove "#" if present
+            var hashtag = query.StartsWith("#") ? query.Substring(1) : query;
+
+            // Retrieve posts containing the exact hashtag
+            var posts = await _context.Posts
+                .Where(p => p.Caption.Contains($"#{hashtag} ") || p.Caption.EndsWith($"#{hashtag}"))
+                .ToListAsync();
+
+
+            // Get the count of posts for the hashtag
+            var hashtagCount = posts.Count;
+
+            // Combine the search results
+            var model = new SearchViewModel
+            {
+                Query = query,
+                Users = usersStartingWithQuery.Concat(usersContainingQuery).ToList(),
+                Hashtags = new List<string> { hashtag },
+                HashtagCounts = new Dictionary<string, int> { { hashtag, hashtagCount } }
+            };
+
+            return PartialView("_SearchResults", model);
+        }
+
+
+
 
     }
 

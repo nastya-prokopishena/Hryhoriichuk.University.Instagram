@@ -8,6 +8,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Models
         public Post Post { get; set; }
         public bool IsLiked { get; set; }
         public int LikeCount { get; set; }
+        public virtual ApplicationUser User { get; set; }
         public List<ApplicationUser> Likers { get; set; }
         public List<Comment> Comments { get; set; }
 

@@ -8,8 +8,55 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Hryhoriichuk.University.Instagram.Web.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-	<link href="~/lib/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
-	<link href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <style>
+        .dropdown-menu {
+            max-height: 300px; /* Set a maximum height for the dropdown menu */
+            overflow-y: auto; /* Enable vertical scrolling if needed */
+            width: 300px; /* Set the width of the dropdown menu */
+        }
+
+        .dropdown-item {
+            display: block; /* Display each item in a block */
+            width: 100%; /* Set the width of each item to 100% */
+            white-space: nowrap; /* Prevent wrapping of text */
+        }
+
+        .list-group-item {
+            display: block; /* Display each item in a block */
+            width: 100%; /* Set the width of each item to 100% */
+            padding: 10px; /* Add padding for spacing */
+            border: none; /* Remove default border */
+            background-color: transparent; /* Make background transparent */
+            cursor: pointer; /* Add pointer cursor */
+        }
+
+        .search-container {
+            position: relative; /* Position container absolute to enable absolute positioning */
+            right: 0; /* Align to the right */
+            top: 100%; /* Position below the loop icon */
+            margin-top: 5px; /* Adjust margin */
+            display: none; /* Hide search container by default */
+        }
+
+        .search-input {
+            padding: 6px 10px; /* Adjust padding */
+            border: 1px solid #ced4da; /* Add border */
+            border-radius: 5px; /* Add border radius */
+            font-size: 16px; /* Adjust font size */
+            width: 200px; /* Adjust width */
+        }
+
+
+        .search-icon {
+            position: absolute; /* Position icon absolute */
+            right: 10px; /* Adjust position */
+            top: 50%; /* Align vertically */
+            transform: translateY(-50%); /* Center vertically */
+            cursor: pointer; /* Add pointer cursor */
+        }
+    </style>
 
 </head>
 <body>
@@ -24,13 +71,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" href="/swagger">Swagger UI</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                            <a class="nav-link text-dark" href="/swagger">Swagger</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Feed" asp-action="Feed">Feed</a>
@@ -44,7 +85,12 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Post" asp-action="UploadMedia">+</a>
                         </li>
-                        <li>
+                        <li class="nav-item">
+                            <button id="search-toggle-btn" class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i> <!-- Loop icon -->
+                            </button>
+                        </li>
+                        <li class="nav-item">
                             <button class="btn btn-outline-primary" onclick="location.href='@Url.Action("Index", "Notification")'">
                                 <i class="bi bi-bell"></i>
                                 @if (ViewData["unreadNotificationsCount"] != null)
@@ -53,24 +99,83 @@
                                 }
                             </button>
                         </li>
-
+                        <li class="nav-item">
+                            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col search-container">
+                                        <input id="live-search-input" type="search" placeholder="Search" aria-label="Search" name="query" class="search-input kw" autocomplete="off" style="padding: 6px 10px;" />
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col">
+                                        <div class="dropdown" id="search-dropdown">
+                                            <!-- Add a class to the dropdown-menu to apply custom styles -->
+                                            <div class="dropdown-menu dropdown-custom" aria-labelledby="searchDropdownButton" id="search-results-dropdown">
+                                                <!-- Add the 'list-group' class to display users as a list -->
+                                                <div id="search-results" class="dropdown-content result list-group"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
                     </ul>
-                    <partial name="_LoginPartial" />
+                    
+
                 </div>
-            </div>
-        </nav>
+                <partial name="_LoginPartial" />
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
-
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2024 - Denys Hryhoriichuk - <a asp-area="" asp-page="/Privacy">Privacy</a>
         </div>
     </footer>
+
+    <script>
+        $(document).ready(function () {
+            // Toggle search container visibility
+            $('#search-toggle-btn').click(function () {
+                $('.search-container').toggle();
+            });
+
+            $('#live-search-input').on('input', function () {
+                var query = $(this).val();
+
+                // Perform live search while typing
+                $.ajax({
+                    url: "/Search",
+                    type: 'GET',
+                    data: { query: query },
+                    success: function (response) {
+                        if (response.trim().length > 0) {
+                            $('#search-results-dropdown').show(); // Show the dropdown menu
+                            $('#search-results').html(response);
+                        } else {
+                            $('#search-results-dropdown').hide(); // Hide the dropdown menu
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+
+            // Hide the dropdown menu when the input field is blurred
+            $('#live-search-input').on('blur', function () {
+                // Delay hiding the dropdown menu to allow time for clicking on it
+                setTimeout(function () {
+                    $('#search-results-dropdown').hide();
+                }, 200);
+            });
+        });
+    </script>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

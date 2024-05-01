@@ -6,6 +6,12 @@
         color: inherit; /* Inherit the color from the parent */
         text-decoration: none; /* Remove underline */
     }
+
+    .post-image {
+        max-width: 100%;
+        border-radius: 5px;
+        width: 1080px;
+    }
 </style>
 
 @foreach (var post in Model)
@@ -19,28 +25,11 @@
         <p class="post-caption">@post.Caption</p>
         <p class="post-date">Date Posted: @post.DatePosted.ToShortDateString()</p>
 
-        <!-- Like button -->
-        <form method="post" action="@Url.Action("ToggleLike", "Profile")">
-            <input type="hidden" name="postId" value="@post.Id" />
-            <button type="submit" class="btn btn-primary">Like</button>
-        </form>
+        @await Html.PartialAsync("_LikesPartial", Model)
 
-        <!-- Comment section -->
+        <!-- Include partial view for displaying comments -->
         <div class="comment-container">
-            <!-- Display comments for the post -->
-            @foreach (var comment in post.Comments)
-            {
-                <div class="comment">
-                    <span class="comment-username">@comment.User.UserName:</span> @comment.Text
-                </div>
-            }
-
-            <!-- Add a form for adding comments -->
-            <form method="post" action="@Url.Action("AddComment", "Profile")">
-                <input type="hidden" name="postId" value="@post.Id" />
-                <textarea name="commentText" class="comment-input" placeholder="Add a comment"></textarea>
-                <button type="submit" class="btn btn-primary">Post Comment</button>
-            </form>
+            @await Html.PartialAsync("_CommentsPartial", Model)
         </div>
     </div>
 }

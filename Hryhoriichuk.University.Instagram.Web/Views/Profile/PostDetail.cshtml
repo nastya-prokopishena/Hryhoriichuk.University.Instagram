@@ -71,6 +71,7 @@
     .post-image {
         max-width: 100%;
         border-radius: 5px;
+        width: 1080px;
     }
 
     .post-caption {
@@ -92,6 +93,33 @@
     .comment-input {
         margin-top: 20px;
     }
+
+    .dropdown-menu {
+        position: absolute;
+        right: 0;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-radius: 5px;
+        display: none;
+    }
+
+    .dropdown-item {
+        padding: 10px;
+        text-decoration: none;
+        display: block;
+        color: #333;
+    }
+
+        .dropdown-item:hover {
+            background-color: #ddd;
+        }
+
+    .show {
+        display: block;
+    }
+
+
 </style>
 
 <div class="container">
@@ -101,9 +129,46 @@
                 <div class="post-header">
                     <img src="@Model.ProfilePicturePath" alt="Profile Picture" class="post-profile-picture">
                     <a href="/Profile/@ViewBag.PostUsername" class="post-username">@ViewBag.PostUsername</a>
-                </div>
+                    @if (ViewData["IsCurrentUserProfile"] as bool? == true)
+                    {
+                        <div class="dropdown ellipsis-dropdown">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="ellipsisDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                ...
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="ellipsisDropdown">
+                                <form action="@Url.Action("EditCaption", "Profile")" method="post">
+                                    <input type="hidden" name="postId" value="@Model.Id" />
+                                    <input type="text" name="captionText" placeholder="Enter new caption" required />
+                                    <button type="submit" class="dropdown-item">Edit Caption</button>
+                                </form>
+                                <form action="@Url.Action("DeletePost", "Profile")" method="post">
+                                    <input type="hidden" name="postId" value="@Model.Id" />
+                                    <button type="submit" class="dropdown-item">Delete Post</button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                    </div>
                 <img src="@Model.ImagePath" class="post-image" alt="Post Image">
-                <p class="post-caption">@Model.Caption</p>
+                <p class="post-caption">
+                    @{
+                        var captionWithHashTags = Model.Caption.Split('#');
+                        for (int i = 0; i < captionWithHashTags.Length; i++)
+                        {
+                            var segment = captionWithHashTags[i];
+                            if (i > 0)
+                            {
+                                var hashtag = segment.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).First();
+                                <a href="@Url.Action("PostsByHashtag", "Profile", new { hashtag = hashtag })" style="color: blue;">#@(hashtag)</a>
+                                @segment.Substring(hashtag.Length)
+                            }
+                            else
+                            {
+                                @segment
+                            }
+                        }
+                    }
+                </p>
                 <p class="post-date">Date Posted: @Model.DatePosted.ToShortDateString()</p>
 
                 @if (Model.LikeCount > 0)
@@ -177,5 +242,23 @@
                 modal.style.display = "none";
             }
         }
+
+        document.querySelector('.ellipsis-icon').addEventListener('click', function () {
+            document.querySelector('.dropdown-menu').classList.toggle('show');
+        });
+
+        window.addEventListener('click', function (event) {
+            if (!event.target.matches('.ellipsis-icon')) {
+                var dropdowns = document.getElementsByClassName("dropdown-menu");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        });
     </script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 }

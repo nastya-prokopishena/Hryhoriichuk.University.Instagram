@@ -1,0 +1,72 @@
+﻿@model List<Hryhoriichuk.University.Instagram.Web.Models.PostInfo>
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    /* Add your custom CSS styles here */
+    .container {
+        margin-top: 20px;
+    }
+
+    .post-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-gap: 20px;
+    }
+
+    .post-container {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .post-profile-picture {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+
+    .post-username {
+        font-weight: bold;
+        color: inherit; /* Inherit the color from the parent */
+        text-decoration: none; /* Remove underline */
+    }
+
+    .post-image {
+        max-width: 100%;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .post-caption {
+        margin-top: 10px;
+    }
+</style>
+
+<div class="container">
+    <h1>Posts with Hashtag: #@(ViewBag.Hashtag) (Total: @Model.Count)</h1>
+    <div class="post-grid">
+        @foreach (var post in Model)
+        {
+            <a href="/Profile/@post.User.UserName/@post.Post.Id" class="post-username">
+                <div class="post-container">
+                    <div class="post-header">
+                        <img src="@post.ProfilePicturePath" class="post-profile-picture" alt="Profile Picture"> @post.User.UserName
+                    </div>
+                    <img src="@post.ImagePath" class="post-image" alt="Post Image">
+                    <p class="post-caption">@post.Caption</p>
+                </div>
+            </a>
+        }
+    </div>
+</div>
