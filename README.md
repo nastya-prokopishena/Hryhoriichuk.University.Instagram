@@ -82,3 +82,10 @@ Add your task decomposition here.
 - Develop backend logic for searching users, hashtags, and posts ✔️
 - Integrate search functionality with user interface ✔️
 - Write unit tests for search functionalities
+
+### Week 10:
+- Implement feature: Stories ✔️
+- Design UI for stories interface ✔️
+- Develop backend logic for creating and displaying stories ✔️
+- Implement time-based story expiration ✔️
+- Write unit tests for story functionalities
