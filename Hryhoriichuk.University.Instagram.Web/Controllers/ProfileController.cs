@@ -346,6 +346,10 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 .Where(p => p.UserId == user.Id)
                 .ToListAsync();
 
+            var userStories = await _context.Stories
+                .Where(s => s.UserId == user.Id && s.PostedAt >= DateTime.Now.AddDays(-1) && s.ExpiresAt > DateTime.Now)
+                .ToListAsync();
+
             // Check if the currently logged-in user is following this user
             var isFollowing = false;
             if (currentUser != null)
@@ -362,6 +366,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 UserName = user.UserName,
                 Email = user.Email,
                 Posts = userPosts, // Assign the user's posts to the model
+                Stories = userStories,
                 IsFollowing = isFollowing,
                 ProfilePicturePath = user.ProfilePicturePath
             };
@@ -470,6 +475,52 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             return PartialView("_SearchResults", model);
         }
 
+        [HttpGet]
+        [Route("Profile/StoryView/{id}")]
+        public async Task<IActionResult> StoryView(int id)
+        {
+            var story = await _context.Stories
+                .Include(s => s.User) // Include the related ApplicationUser
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (story == null)
+            {
+                return NotFound(); // Return 404 if the story is not found
+            }
+
+            // Get the IDs of the next and previous stories
+            var nextStoryId = await _context.Stories
+                .Where(s => s.UserId == story.UserId && s.Id > id)
+                .Select(s => s.Id)
+                .OrderBy(s => s)
+                .FirstOrDefaultAsync();
+
+            var previousStoryId = await _context.Stories
+                .Where(s => s.UserId == story.UserId && s.Id < id)
+                .Select(s => s.Id)
+                .OrderByDescending(s => s)
+                .FirstOrDefaultAsync();
+
+            // Calculate the duration until the story expires
+            var timeUntilExpiration = story.ExpiresAt - DateTime.Now;
+
+            // Prepare the model data including next and previous story IDs
+            var model = new StoryViewModel
+            {
+                UserId = story.UserId,
+                User = story.User,
+                ProfilePicturePath = story.User.ProfilePicturePath,
+                MediaUrl = story.MediaUrl,
+                PostedAt = story.PostedAt,
+                ExpiresAt = timeUntilExpiration, // Calculate time remaining until expiration
+                NextStoryId = nextStoryId,
+                PreviousStoryId = previousStoryId,
+                HasNextStory = nextStoryId != default,
+                HasPreviousStory = previousStoryId != default
+            };
+
+            return PartialView("_StoryPartial", model);
+        }
 
 
 

@@ -29,5 +29,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Models
         public bool IsLockedOut { get; set; }
         public bool IsFollowing { get; set; }
         public ICollection<Post> Posts { get; set; }
+        public ICollection<Story> Stories { get; set; }
     }
 }

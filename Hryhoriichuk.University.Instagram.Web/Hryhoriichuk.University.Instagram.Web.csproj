@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <Folder Include="Views\IndexModel\" />
+    <Folder Include="wwwroot\uploads\stories\" />
     <Folder Include="wwwroot\uploads\profilepictures\" />
   </ItemGroup>
 

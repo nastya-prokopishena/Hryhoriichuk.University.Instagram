@@ -21,6 +21,7 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Follow> Follows { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<Story> Stories { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -84,6 +85,13 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Notification>()
                 .Property(n => n.PostId)
                 .IsRequired(false);
+
+        builder.Entity<Story>()
+            .HasOne(s => s.User)
+            .WithMany()
+            .HasForeignKey(s => s.UserId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.NoAction);
 
     }
 }

@@ -1,0 +1,49 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.Story
+
+@{
+    Layout = "_Layout";
+}
+
+<h2>Upload Story</h2>
+
+<form asp-action="UploadStory" method="post" enctype="multipart/form-data" id="upload-form">
+    <div class="form-group">
+        <label for="file">Upload Story:</label>
+        <input type="file" name="file" id="file" class="form-control-file" onchange="previewImage(event)">
+        <span asp-validation-for="file" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="caption">Add Text (optional):</label>
+        <input type="text" name="Caption" id="caption" class="form-control">
+    </div>
+
+    <!-- Image preview and text overlay -->
+    <div class="form-group">
+        <canvas id="image-preview-canvas" style="max-width: 100%; height: auto;"></canvas>
+    </div>
+
+    <!-- Upload button -->
+    <button type="submit" class="btn btn-primary">Upload Story</button>
+</form>
+
+<script>
+    function previewImage(event) {
+        var canvas = document.getElementById("image-preview-canvas");
+        var context = canvas.getContext("2d");
+        var img = new Image();
+        img.onload = function () {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            context.drawImage(img, 0, 0);
+        }
+        img.src = URL.createObjectURL(event.target.files[0]);
+
+        var caption = document.getElementById("caption").value;
+        if (caption) {
+            context.font = "30px Arial";
+            context.fillStyle = "white";
+            context.fillText(caption, 10, 50);
+        }
+    }
+</script>

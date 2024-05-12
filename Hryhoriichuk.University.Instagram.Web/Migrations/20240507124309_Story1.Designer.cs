@@ -4,6 +4,7 @@ using Hryhoriichuk.University.Instagram.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hryhoriichuk.University.Instagram.Web.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240507124309_Story1")]
+    partial class Story1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -346,16 +349,11 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                     b.Property<DateTime>("PostedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ProfileId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProfileId");
 
                     b.HasIndex("UserId");
 
@@ -626,10 +624,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
 
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Story", b =>
                 {
-                    b.HasOne("Hryhoriichuk.University.Instagram.Web.Models.Profile", null)
-                        .WithMany("Stories")
-                        .HasForeignKey("ProfileId");
-
                     b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -707,8 +701,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Profile", b =>
                 {
                     b.Navigation("Posts");
-
-                    b.Navigation("Stories");
                 });
 #pragma warning restore 612, 618
         }
