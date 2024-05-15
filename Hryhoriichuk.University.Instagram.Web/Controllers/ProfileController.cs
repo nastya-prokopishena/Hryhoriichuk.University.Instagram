@@ -129,6 +129,19 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
 
             ViewData["IsCurrentUserProfile"] = currentUser != null && currentUser.Id == user.Id;
 
+
+            var isFollowing = false;
+            if (currentUser != null)
+            {
+                var follow = await _context.Follows.FirstOrDefaultAsync(f => f.FollowerId == currentUser.Id && f.FolloweeId == user.Id);
+                isFollowing = follow != null;
+            }
+
+            var userProfile = await _context.Users.FirstOrDefaultAsync(p => p.UserName == username);
+
+            ViewBag.IsFollowing = isFollowing;
+            ViewBag.IsPrivate = userProfile?.IsPrivate ?? false;
+
             var viewModel = new PostInfo
             {
                 Post = post,
@@ -163,6 +176,12 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             }
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var privacySettings = await _context.PrivacySettings.FirstOrDefaultAsync(ps => ps.UserId == post.UserId);
+            if (privacySettings == null || privacySettings.CommentPrivacy == CommentPrivacy.Nobody)
+            {
+                return BadRequest("Commenting is not allowed on this post.");
+            }
 
             // Create a new comment
             var comment = new Comment
@@ -350,6 +369,12 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 .Where(s => s.UserId == user.Id && s.PostedAt >= DateTime.Now.AddDays(-1) && s.ExpiresAt > DateTime.Now)
                 .ToListAsync();
 
+            var followRequests = await _context.FollowRequests
+                .Where(fr => fr.FollowedId == user.Id && fr.IsAccepted == false)
+                .ToListAsync();
+
+            ViewData["HasPendingFollowRequest"] = followRequests.Any(fr => fr.FollowerId == currentUser.Id);
+
             // Check if the currently logged-in user is following this user
             var isFollowing = false;
             if (currentUser != null)
@@ -368,7 +393,8 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 Posts = userPosts, // Assign the user's posts to the model
                 Stories = userStories,
                 IsFollowing = isFollowing,
-                ProfilePicturePath = user.ProfilePicturePath
+                ProfilePicturePath = user.ProfilePicturePath,
+                IsPrivate = user.IsPrivate
             };
 
             // Add a flag to indicate whether the current user is viewing their own profile
@@ -394,15 +420,29 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
-            // Get all posts
-            var allPosts = await _context.Posts.Include(p => p.User).ToListAsync();
+            // Get IDs of users whom the current user is following
+            var followingIds = await _context.Follows
+                .Where(f => f.FollowerId == currentUser.Id)
+                .Select(f => f.FolloweeId)
+                .ToListAsync();
 
-            // Define weights for likes and comments
+            // Get IDs of users who have private accounts
+            var privateUserIds = await _context.Users
+                .Where(u => u.IsPrivate)
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            // Get all posts from users whom the current user is following or who don't have private accounts
+            var filteredPosts = await _context.Posts
+                .Include(p => p.User)
+                .Where(p => !privateUserIds.Contains(p.UserId) || followingIds.Contains(p.UserId))
+                .ToListAsync();
+
             const double likeWeight = 1.0;
-            const double commentWeight = 2.0; // Assuming comments are more engaging than likes
+            const double commentWeight = 2.0;
 
-            // Calculate followerScore for each post
-            var postsWithScores = allPosts.Select(post =>
+            // Calculate followerScore for filtered posts
+            var postsWithScores = filteredPosts.Select(post =>
             {
                 var likeCount = _context.Likes.Count(l => l.PostId == post.Id);
                 var commentCount = _context.Comments.Count(c => c.PostId == post.Id);
@@ -417,7 +457,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 };
             });
 
-            // Sort posts by followerScore in descending order
+            // Sort filtered posts by followerScore in descending order
             var sortedPosts = postsWithScores.OrderByDescending(p => p.FollowerScore).Select(p => p.Post);
 
             return View(sortedPosts);
@@ -476,27 +516,37 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
         }
 
         [HttpGet]
-        [Route("Profile/StoryView/{id}")]
-        public async Task<IActionResult> StoryView(int id)
+        [Route("Profile/StoryView/{userId}")]
+        public async Task<IActionResult> StoryView(string userId)
         {
+            // Get the earliest active story for the given user ID
             var story = await _context.Stories
                 .Include(s => s.User) // Include the related ApplicationUser
-                .FirstOrDefaultAsync(s => s.Id == id);
+                .Where(s => s.UserId == userId && DateTime.Now >= s.PostedAt && DateTime.Now <= s.ExpiresAt)
+                .OrderBy(s => s.PostedAt)
+                .FirstOrDefaultAsync();
 
             if (story == null)
             {
-                return NotFound(); // Return 404 if the story is not found
+                return NotFound(); // Return 404 if no active story is found
             }
+
+            // Get all active stories for the given user ID
+            var activeStories = await _context.Stories
+                .Where(s => s.UserId == userId && DateTime.Now >= s.PostedAt && DateTime.Now <= s.ExpiresAt)
+                .OrderBy(s => s.PostedAt)
+                .Select(s => new ActiveStoryViewModel { Id = s.Id, PostedAt = s.PostedAt })
+                .ToListAsync();
 
             // Get the IDs of the next and previous stories
             var nextStoryId = await _context.Stories
-                .Where(s => s.UserId == story.UserId && s.Id > id)
+                .Where(s => s.UserId == story.UserId && s.Id > story.Id)
                 .Select(s => s.Id)
                 .OrderBy(s => s)
                 .FirstOrDefaultAsync();
 
             var previousStoryId = await _context.Stories
-                .Where(s => s.UserId == story.UserId && s.Id < id)
+                .Where(s => s.UserId == story.UserId && s.Id < story.Id)
                 .Select(s => s.Id)
                 .OrderByDescending(s => s)
                 .FirstOrDefaultAsync();
@@ -504,7 +554,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             // Calculate the duration until the story expires
             var timeUntilExpiration = story.ExpiresAt - DateTime.Now;
 
-            // Prepare the model data including next and previous story IDs
+            // Prepare the model data including next and previous story IDs and active stories
             var model = new StoryViewModel
             {
                 UserId = story.UserId,
@@ -516,12 +566,42 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 NextStoryId = nextStoryId,
                 PreviousStoryId = previousStoryId,
                 HasNextStory = nextStoryId != default,
-                HasPreviousStory = previousStoryId != default
+                HasPreviousStory = previousStoryId != default,
+                ActiveStories = activeStories
             };
 
             return PartialView("_StoryPartial", model);
         }
 
+        [Route("Privacy")]
+        public async Task<IActionResult> Privacy()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            var viewModel = new PrivacySettingsViewModel
+            {
+                UserId = currentUser.Id, // Assuming UserId is a property of the PrivacySettingsViewModel
+                IsPrivate = currentUser.IsPrivate // Assuming IsPrivate is a property of the ApplicationUser representing the current user
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdatePrivacySettings(bool isPrivate)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (currentUser != null)
+            {
+                // Toggle the IsPrivate property
+                currentUser.IsPrivate = !currentUser.IsPrivate;
+                await _context.SaveChangesAsync();
+                return Json(new { success = true, isPrivate = currentUser.IsPrivate });
+            }
+
+            return Json(new { success = false });
+        }
 
 
     }

@@ -1,0 +1,68 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.PrivacySettingsViewModel
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    .mt-4 {
+        margin-top: 1.5rem;
+    }
+</style>
+
+<h1>Privacy settings</h1>
+
+<form id="privacySettingsForm">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="makePrivateCheckbox" @(Model.IsPrivate ? "checked" : "")>
+        <label class="form-check-label" for="makePrivateCheckbox">
+            Make my profile private
+        </label>
+    </div>
+    <button type="button" class="btn btn-primary mt-2" id="savePrivacySettings">Save</button>
+</form>
+
+<div class="mt-4">
+    <a href="@Url.Action("Index", "FollowRequests")" class="btn btn-outline-primary">
+        <i class="bi bi-people"></i> Review pending follow requests
+    </a>
+</div>
+
+<div class="form-group mt-4">
+    <label for="commentPrivacy">Who can comment on your posts?</label>
+    <select class="form-control" id="commentPrivacy">
+        <option value="Everybody" @(Model.CommentPrivacy == 0 ? "selected" : "")>Everybody</option>
+        <option value="OnlyFollowers" @(Model.CommentPrivacy == 1 ? "selected" : "")>Only those who I follow</option>
+        <option value="Nobody" @(Model.CommentPrivacy == 2 ? "selected" : "")>Nobody</option>
+    </select>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var previousState = $("#makePrivateCheckbox").prop("checked");
+
+            $("#savePrivacySettings").click(function () {
+                var currentState = $("#makePrivateCheckbox").prop("checked");
+
+                // Check if the checkbox state has changed
+                if (currentState !== previousState) {
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("UpdatePrivacySettings", "Profile")",
+                        contentType: "application/json",
+                        success: function (response) {
+                            console.log("Privacy settings updated successfully");
+                            // Update the previous state to the current state
+                            previousState = currentState;
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+                            console.error("Error updating privacy settings:", textStatus);
+                        }
+                    });
+                }
+            });
+        });
+
+    </script>
+}

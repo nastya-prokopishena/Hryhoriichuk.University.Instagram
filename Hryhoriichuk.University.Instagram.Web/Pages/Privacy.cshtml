@@ -1,8 +1,41 @@
-﻿@page
-@model PrivacyModel
-@{
-    ViewData["Title"] = "Privacy Policy";
-}
-<h1>@ViewData["Title"]</h1>
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.PrivacySettingsViewModel
 
-<p>Use this page to detail your site's privacy policy.</p>
+@{
+    Layout = "_Layout";
+}
+
+
+<h1>Privacy settings</h1>
+
+<form id="privacySettingsForm">
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="makePrivateCheckbox" @(Model.IsPrivate ? "checked" : "")>
+        <label class="form-check-label" for="makePrivateCheckbox">
+            Make my profile private
+        </label>
+    </div>
+    <button type="button" class="btn btn-primary mt-2" id="savePrivacySettings">Save</button>
+</form>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $("#savePrivacySettings").click(function () {
+                var isPrivate = $("#makePrivateCheckbox").prop("checked");
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("UpdatePrivacySettings", "Profile")",
+                    data: JSON.stringify({ userId: "@Model.UserId", isPrivate: isPrivate }),
+                    contentType: "application/json",
+                    success: function (response) {
+                        console.log("Privacy settings updated successfully");
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        console.error("Error updating privacy settings:", textStatus);
+                    }
+                });
+            });
+        });
+    </script>
+}

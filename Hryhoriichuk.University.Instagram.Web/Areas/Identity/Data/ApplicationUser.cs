@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Hryhoriichuk.University.Instagram.Web.Models;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data;
 
@@ -23,4 +24,6 @@ public class ApplicationUser : IdentityUser
     // Navigation property for users following this user
     public ICollection<Follow> Followings { get; set; }
     public string ProfilePicturePath { get; set; }
+    [DisplayName("Private Account")]
+    public bool IsPrivate { get; set; }
 }

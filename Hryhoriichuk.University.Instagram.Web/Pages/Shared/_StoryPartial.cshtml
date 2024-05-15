@@ -1,8 +1,6 @@
 ﻿@model Hryhoriichuk.University.Instagram.Web.Models.StoryViewModel
 
-<!-- Style for the modal -->
 <style>
-    /* Modal container */
     .modal {
         display: none; /* Hidden by default */
         position: fixed; /* Stay in place */
@@ -16,7 +14,6 @@
         background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
     }
 
-    /* Modal content */
     .modal-content {
         background-color: #fefefe;
         margin: 15% auto; /* 15% from the top and centered */
@@ -96,44 +93,61 @@
         }
 </style>
 
-@section scripts {
-    <script>
-        // Function to load story details
-        function loadStory(url) {
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    // Replace the modal content with the loaded story details
-                    document.querySelector('.modal-content').innerHTML = html;
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    </script>
-}
-
-<!-- Modal -->
 <div id="storyModal" class="modal">
     <!-- Modal content -->
     <div class="modal-content">
         <span class="close">&times;</span>
+
         <!-- User information -->
         <div class="user-info">
             <img src="@Model.ProfilePicturePath" alt="Profile Picture" class="profile-picture">
             <div class="username">@Model.User.UserName</div>
         </div>
+
         <!-- Story media -->
         <img src="@Model.MediaUrl" alt="Story" class="story-image">
+
         <!-- Posted time and expiration -->
         <div class="story-details">
             <div class="posted-time">@Model.PostedAt.ToString("MMMM dd, yyyy HH:mm")</div>
             <div class="expires-in">Expires in: @Model.ExpiresAt.Hours hours @Model.ExpiresAt.Minutes minutes</div>
         </div>
-        <!-- Previous and next story buttons -->
+
+        <!-- Navigation buttons -->
+        <div class="story-navigation">
+            <button class="prev" onclick="navigateStory('prev')">Previous</button>
+            <button class="next" onclick="navigateStory('next')">Next</button>
+        </div>
     </div>
 </div>
 
+@section scripts {
+    <script>
+        // Initialize current story index
+        let currentStoryIndex = 0;
+        const activeStories = @Html.Raw(Json.Serialize(Model.ActiveStories));
+
+        // Function to navigate to the previous or next story
+        function navigateStory(direction) {
+            if (direction === 'prev') {
+                currentStoryIndex = (currentStoryIndex - 1 + activeStories.length) % activeStories.length;
+            } else {
+                currentStoryIndex = (currentStoryIndex + 1) % activeStories.length;
+            }
+            // Update story details based on current index
+            updateStoryDetails();
+        }
+
+        // Function to update story details based on current index
+        function updateStoryDetails() {
+            const currentStory = activeStories[currentStoryIndex];
+            // Update story media, posted time, and expiration
+            document.querySelector('.story-image').src = currentStory.MediaUrl;
+            document.querySelector('.posted-time').textContent = currentStory.PostedAt;
+            // You can also update other details like posted time and expiration here
+        }
+
+        // Call updateStoryDetails initially to display the first story
+        updateStoryDetails();
+    </script>
+}

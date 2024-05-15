@@ -1,0 +1,93 @@
+﻿@model List<Hryhoriichuk.University.Instagram.Web.Models.FollowRequest>
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    /* Table styles */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    /* Profile picture styles */
+    .profile-picture {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    /* Button styles */
+    .btn {
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    /* Center table */
+    .table-container {
+        margin: auto;
+        width: 80%;
+    }
+
+    .post-username {
+        font-weight: bold;
+        color: inherit; /* Inherit the color from the parent */
+        text-decoration: none; /* Remove underline */
+    }
+</style>
+
+<h1>Follow Requests</h1>
+
+@if (Model?.Any() ?? false)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Request From</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in Model)
+            {
+                <tr>
+                    <td><a href="/Profile/@request.Follower.UserName" class="post-username"><img src="@request.Follower.ProfilePicturePath" alt="Profile Picture" class="profile-picture" /> @request.Follower.UserName</a></td>
+                    <td>
+                        <form method="post" action="@Url.Action("AcceptFollowRequest", "Follow")">
+                            <input type="hidden" name="requestId" value="@request.Id" />
+                            <button type="submit" class="btn btn-success">Accept</button>
+                        </form>
+                        <form method="post" action="@Url.Action("RejectFollowRequest", "Follow")">
+                            <input type="hidden" name="requestId" value="@request.Id" />
+                            <button type="submit" class="btn btn-danger">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No follow requests found.</p>
+}

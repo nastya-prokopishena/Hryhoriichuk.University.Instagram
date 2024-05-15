@@ -4,6 +4,7 @@ using Hryhoriichuk.University.Instagram.Web.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hryhoriichuk.University.Instagram.Web.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240514132750_FollowRequest1")]
+    partial class FollowRequest1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,9 +47,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -169,7 +169,7 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
 
                     b.Property<string>("FollowerId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsAccepted")
                         .HasColumnType("bit");
@@ -179,11 +179,9 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FollowerId");
-
                     b.HasIndex("ProfileId");
 
-                    b.ToTable("FollowRequests");
+                    b.ToTable("FollowRequest");
                 });
 
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Like", b =>
@@ -324,24 +322,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Posts");
-                });
-
-            modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.PrivacySettings", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("CommentPrivacy")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("bit");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("PrivacySettings");
                 });
 
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Profile", b =>
@@ -603,17 +583,9 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
 
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.FollowRequest", b =>
                 {
-                    b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "Follower")
-                        .WithMany()
-                        .HasForeignKey("FollowerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Hryhoriichuk.University.Instagram.Web.Models.Profile", null)
                         .WithMany("FollowRequests")
                         .HasForeignKey("ProfileId");
-
-                    b.Navigation("Follower");
                 });
 
             modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.Like", b =>
@@ -689,17 +661,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Hryhoriichuk.University.Instagram.Web.Models.PrivacySettings", b =>
-                {
-                    b.HasOne("Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser", "User")
-                        .WithOne()
-                        .HasForeignKey("Hryhoriichuk.University.Instagram.Web.Models.PrivacySettings", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");

@@ -30,5 +30,8 @@ namespace Hryhoriichuk.University.Instagram.Web.Models
         public bool IsFollowing { get; set; }
         public ICollection<Post> Posts { get; set; }
         public ICollection<Story> Stories { get; set; }
+        public ICollection<FollowRequest> FollowRequests { get; set; }
+        [DisplayName("Private Account")]
+        public bool IsPrivate { get; set; }
     }
 }

@@ -22,6 +22,8 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Message> Messages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<Story> Stories { get; set; }
+    public DbSet<FollowRequest> FollowRequests { get; set; }
+    public DbSet<PrivacySettings> PrivacySettings { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -92,6 +94,20 @@ public class AuthDbContext : IdentityDbContext<ApplicationUser>
             .HasForeignKey(s => s.UserId)
             .IsRequired()
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder.Entity<PrivacySettings>()
+            .Property(ps => ps.CommentPrivacy)
+            .IsRequired()
+            .HasDefaultValue(CommentPrivacy.Everybody);
+
+        builder.Entity<PrivacySettings>()
+            .HasKey(ps => ps.UserId);
+
+        builder.Entity<PrivacySettings>()
+            .HasOne(ps => ps.User)
+            .WithOne()
+            .HasForeignKey<PrivacySettings>(ps => ps.UserId)
+            .IsRequired();
 
     }
 }

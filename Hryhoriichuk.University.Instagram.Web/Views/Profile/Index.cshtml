@@ -77,10 +77,37 @@
     .post-card:hover .post-caption {
         display: block;
     }
+
+    .profile-image-container {
+        position: relative;
+        display: inline-block; /* Ensure the container fits its content */
+    }
+
+    .active-story-indicator {
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        width: calc(100% + 10px);
+        height: calc(100% + 10px);
+        border-radius: 50%;
+        border: 5px solid #ff6347; /* Adjust the color as needed */
+        z-index: 1; /* Ensure it's above the profile picture */
+        box-sizing: border-box;
+    }
+
+    .private-profile-info {
+        display: none;
+    }
 </style>
 
 <div class="profile-container">
-    <img src="@Model.ProfilePicturePath" alt="Profile Picture" class="profile-image" />
+    <div class="profile-image-container" onclick="openActiveStoriesModal('@Url.Action("StoryView", "Profile", new { userId = Model.Id })')">
+        @if (Model.Stories != null && Model.Stories.Any(s => DateTime.Now >= s.PostedAt && DateTime.Now <= s.ExpiresAt))
+        {
+            <div class="active-story-indicator"></div>
+        }
+        <img src="@Model.ProfilePicturePath" alt="Profile Picture" class="profile-image" />
+    </div>
     <div class="profile-info">
         <div class="username">@Model.UserName</div>
         <div class="full-name">@Model.FullName</div>
@@ -95,18 +122,46 @@
                 <span class="close">&times;</span>
                 <h2>Followers and Followings</h2>
                 <div id="followersFollowingsList">
-                    <!-- Followers/Followings list will be added dynamically here -->
                 </div>
             </div>
         </div>
 
+        @if (!(ViewData["IsCurrentUserProfile"] as bool? == true))
+        {
+            @if (Model.IsPrivate && !Model.IsFollowing)
+            {
+                @if (ViewData["HasPendingFollowRequest"] as bool? ?? false)
+                {
+                    <hr />
+                    <p>Your follow request is pending.</p>
 
+                    <form id="cancelFollowRequestForm" method="post" action="@Url.Action("CancelFollowRequest", "Follow")">
+                        <input type="hidden" name="userIdToCancelRequest" value="@Model.Id" />
+                        <button type="submit" class="btn btn-danger mt-2">Cancel Follow Request</button>
+                    </form>
+                }
+                else
+                {
+                    <form id="sendFollowRequestForm" method="post" action="@Url.Action("SendFollowRequest", "Follow")">
+                        <input type="hidden" name="userIdToFollow" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary mt-2">Send Follow Request</button>
+                    </form>
+
+                    <hr />
+
+                    <div style="display: flex; align-items: center;">
+                        <i class="bi bi-lock-fill text-danger" style="font-size: 1.5rem; margin-right: 10px;"></i>
+                        <h5>This profile is private. Send request to follow them!</h5>
+                    </div>
+                }
+            }
+        }
         @if (ViewData["IsCurrentUserProfile"] as bool? == true)
         {
             <!-- Add elements specific to the current user's profile -->
             <a href="#">Edit Profile</a>
         }
-        else
+        @if (!(ViewData["IsCurrentUserProfile"] as bool? == true) && !((Model.IsPrivate && !Model.IsFollowing)))
         {
             <form id="messageForm" method="post" action="@Url.Action("NewChat", "Message")">
                 <input type="hidden" name="username" value="@Model.UserName" />
@@ -126,85 +181,42 @@
                     }
                 </button>
             </form>
+
         }
     </div>
 </div>
 
-<hr />
+@if ((Model.IsPrivate && !Model.IsFollowing) == false || (ViewData["IsCurrentUserProfile"] as bool? == true))
+{
+    <hr />
 
-<div>
-    <h4>Stories</h4>
-    @if (Model.Stories != null && Model.Stories.Any())
-    {
-        <div class="story-card">
-            @foreach (var story in Model.Stories.OrderBy(s => s.PostedAt))
-            {
-                <!-- Check if the story is active -->
-                @if (DateTime.Now >= story.PostedAt && DateTime.Now <= story.ExpiresAt)
+    <div class="profile-info">
+        <h4>Posts</h4>
+        @if (Model.Posts != null && Model.Posts.Any())
+        {
+            <div class="posts-grid">
+                @foreach (var post in Model.Posts.OrderByDescending(p => p.DatePosted))
                 {
-                    <!-- Display the story preview as a small icon -->
-                    <img src="@story.MediaUrl" alt="Story" class="story-image" style="width: 100px; height: 100px;" onclick="openStoryModal('@Url.Action("StoryView", "Profile", new { id = story.Id })')" data-story-id="@story.Id">
-
+                    <div class="post-card">
+                        <a href="@Url.Action("PostDetail", "Profile", new { username = Model.UserName, postId = post.Id })">
+                            <div class="post-image" style="background-image: url('@post.ImagePath')"></div>
+                            <div class="post-caption">@post.Caption</div>
+                        </a>
+                    </div>
                 }
-            }
-        </div>
-    }
-    else
-    {
-        <p>No stories found.</p>
-    }
-</div>
+            </div>
+        }
+        else
+        {
+            <p>No posts found.</p>
+        }
+    </div>
+}
 
 
-
-
-<div>
-    <h4>Posts</h4>
-    @if (Model.Posts != null && Model.Posts.Any())
-    {
-        <div class="posts-grid">
-            @foreach (var post in Model.Posts.OrderByDescending(p => p.DatePosted))
-            {
-                <div class="post-card">
-                    <a href="@Url.Action("PostDetail", "Profile", new { username = Model.UserName, postId = post.Id })">
-                        <div class="post-image" style="background-image: url('@post.ImagePath')"></div>
-                        <div class="post-caption">@post.Caption</div>
-                    </a>
-                </div>
-            }
-        </div>
-    }
-    else
-    {
-        <p>No posts found.</p>
-    }
-</div>
 
 @section scripts {
     <script>
-        // Function to open the story modal and load story details
-        function openStoryModal(url) {
-            console.log('Opening story modal...');
-            // Close any previously open modal
-            closeStoryModal();
-            // Fetch the story details and display them in the modal
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(html => {
-                    console.log('Story modal HTML:', html);
-                    // Append the HTML content to the body
-                    document.body.insertAdjacentHTML('beforeend', html);
-                    // Show the modal
-                    document.getElementById('storyModal').style.display = 'block';
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
         // Function to close the story modal
         function closeStoryModal() {
             console.log('Closing story modal...');
@@ -227,6 +239,60 @@
             if (event.target == modal) {
                 console.log('Clicked outside story modal, closing...');
                 closeStoryModal();
+            }
+        }
+
+        // Function to open the modal and load the active stories
+        function openActiveStoriesModal(url) {
+            console.log('Opening active stories modal...');
+            // Close any previously open modal
+            closeStoryModal();
+            // Fetch the active stories and display them in the modal
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text(); // Get the response as text
+                })
+                .then(html => {
+                    console.log('Active stories modal HTML:', html);
+                    // Construct a div element to contain the HTML content
+                    const container = document.createElement('div');
+                    container.innerHTML = html; // Set the HTML content
+                    // Append the HTML content to the body
+                    document.body.appendChild(container);
+                    // Show the modal
+                    document.getElementById('storyModal').style.display = 'block';
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+
+
+        // Function to navigate to the previous or next story within the modal
+        function navigateStory(direction) {
+            console.log('Navigating story:', direction); // Log the direction
+            let currentStoryIdElement = document.getElementById('currentStoryId');
+            if (currentStoryIdElement) {
+                let currentStoryId = parseInt(currentStoryIdElement.innerText);
+
+                // Determine the URL for the next or previous story
+                let url = direction === 'prev' ? `/Profile/StoryView/${currentStoryId - 1}` : `/Profile/StoryView/${currentStoryId + 1}`;
+
+                // Fetch the next or previous story
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        // Update the modal content with the new story
+                        document.querySelector('.modal-content').innerHTML = html;
+                    })
+                    .catch(error => console.error('Error:', error));
             }
         }
     </script>
