@@ -160,6 +160,7 @@
         {
             <!-- Add elements specific to the current user's profile -->
             <a href="#">Edit Profile</a>
+            <a href="@Url.Action("Dashboard", "Profile")" class="btn btn-info mt-2">Open Dashboard</a>
         }
         @if (!(ViewData["IsCurrentUserProfile"] as bool? == true) && !((Model.IsPrivate && !Model.IsFollowing)))
         {
@@ -198,7 +199,7 @@
                 @foreach (var post in Model.Posts.OrderByDescending(p => p.DatePosted))
                 {
                     <div class="post-card">
-                        <a href="@Url.Action("PostDetail", "Profile", new { username = Model.UserName, postId = post.Id })">
+                        <a href="@Url.Action("PostDetail", "Post", new { username = Model.UserName, postId = post.Id })">
                             <div class="post-image" style="background-image: url('@post.ImagePath')"></div>
                             <div class="post-caption">@post.Caption</div>
                         </a>

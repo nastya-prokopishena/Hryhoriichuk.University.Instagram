@@ -5,7 +5,7 @@
     bool isLiked = ViewBag.IsLiked;
 }
 
-<form id="likeForm" method="post" action="@Url.Action("ToggleLike", "Profile")">
+<form id="likeForm" method="post" action="@Url.Action("ToggleLike", "Post")">
     <div class="mb-3">
         <input type="hidden" name="postId" value="@Model.Id" />
         <button type="submit" class="btn" id="likeButton">

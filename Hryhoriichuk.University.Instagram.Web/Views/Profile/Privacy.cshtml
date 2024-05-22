@@ -31,14 +31,16 @@
 <div class="form-group mt-4">
     <label for="commentPrivacy">Who can comment on your posts?</label>
     <select class="form-control" id="commentPrivacy">
-        <option value="Everybody" @(Model.CommentPrivacy == 0 ? "selected" : "")>Everybody</option>
-        <option value="OnlyFollowers" @(Model.CommentPrivacy == 1 ? "selected" : "")>Only those who I follow</option>
-        <option value="Nobody" @(Model.CommentPrivacy == 2 ? "selected" : "")>Nobody</option>
+        <option value="0" @(Model.CommentPrivacy == Hryhoriichuk.University.Instagram.Web.Models.CommentPrivacy.Everybody ? "selected" : "")>Everybody</option>
+        <option value="1" @(Model.CommentPrivacy == Hryhoriichuk.University.Instagram.Web.Models.CommentPrivacy.OnlyFollowers ? "selected" : "")>Only those who I follow</option>
+        <option value="2" @(Model.CommentPrivacy == Hryhoriichuk.University.Instagram.Web.Models.CommentPrivacy.Nobody ? "selected" : "")>Nobody</option>
     </select>
+    <button type="button" class="btn btn-primary mt-2" id="saveCommentPrivacy">Save Comment Privacy</button>
 </div>
 
 @section Scripts {
     <script>
+        // Script for Changing Privacy Settings
         $(function () {
             var previousState = $("#makePrivateCheckbox").prop("checked");
 
@@ -51,6 +53,7 @@
                         type: "POST",
                         url: "@Url.Action("UpdatePrivacySettings", "Profile")",
                         contentType: "application/json",
+                        data: JSON.stringify({ isPrivate: currentState }), // Ensure data is sent
                         success: function (response) {
                             console.log("Privacy settings updated successfully");
                             // Update the previous state to the current state
@@ -62,7 +65,29 @@
                     });
                 }
             });
+
+            // Script for Changing Comment Privacy Settings
+            $("#saveCommentPrivacy").click(function () {
+                var commentPrivacy = $("#commentPrivacy").val();  // Retrieve the selected value
+                updateCommentPrivacy(commentPrivacy);  // Call the function with the selected value
+            });
         });
+
+        function updateCommentPrivacy(commentPrivacy) {
+            console.log("Sending commentPrivacy:", commentPrivacy);  // Log the data to ensure it is correct
+
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("UpdateCommentPrivacy", "Profile")",
+                data: { commentPrivacy: commentPrivacy },
+                success: function (response) {
+                    console.log("Comment privacy settings updated successfully");
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.error("Error updating comment privacy settings:", textStatus);
+                }
+            });
+        }
 
     </script>
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using System.Security.Claims;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -93,253 +94,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
         }
 
 
-        [HttpGet]
-        [Authorize]
-        [Route("Profile/{username}/{postId}")]
-        public async Task<IActionResult> PostDetail(string username, int postId)
-        {
-            var post = await _context.Posts.FindAsync(postId);
-
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _userManager.FindByNameAsync(username);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            // Retrieve additional information like likes and comments
-            var currentUser = await _userManager.GetUserAsync(User);
-            var isLiked = await _context.Likes.AnyAsync(l => l.PostId == postId && l.UserId == currentUser.Id);
-            var likeCount = await _context.Likes.CountAsync(l => l.PostId == postId);
-            var likers = await _context.Likes
-                .Include(l => l.User) // Include the User navigation property
-                .Where(l => l.PostId == postId)
-                .Select(l => l.User.UserName) // Select only the usernames
-                .ToListAsync();
-
-            ViewBag.likeCount = likeCount;
-            ViewBag.isLiked = isLiked;
-
-            var postUser = await _userManager.FindByIdAsync(post.UserId);
-            var postUserProfilePicturePath = postUser.ProfilePicturePath;
-
-            ViewData["IsCurrentUserProfile"] = currentUser != null && currentUser.Id == user.Id;
-
-
-            var isFollowing = false;
-            if (currentUser != null)
-            {
-                var follow = await _context.Follows.FirstOrDefaultAsync(f => f.FollowerId == currentUser.Id && f.FolloweeId == user.Id);
-                isFollowing = follow != null;
-            }
-
-            var userProfile = await _context.Users.FirstOrDefaultAsync(p => p.UserName == username);
-
-            ViewBag.IsFollowing = isFollowing;
-            ViewBag.IsPrivate = userProfile?.IsPrivate ?? false;
-
-            var viewModel = new PostInfo
-            {
-                Post = post,
-                IsLiked = isLiked,
-                LikeCount = likeCount,
-                Comments = await _context.Comments
-                    .Include(c => c.User)
-                    .Where(c => c.PostId == postId)
-                    .ToListAsync(),
-                CurrentUserLiked = isLiked,
-                ProfilePicturePath = postUserProfilePicturePath,
-                UserManager = _userManager
-            };
-
-
-            ViewBag.Likers = likers;
-            ViewBag.PostUsername = username;
-            return View(viewModel);
-        }
-
-        [HttpPost]
-        [Authorize]
-        [Route("Post/AddComment")]
-        public async Task<IActionResult> AddComment(int postId, string commentText)
-        {
-            // Retrieve the post by postId
-            var post = await _context.Posts.FindAsync(postId);
-
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            var privacySettings = await _context.PrivacySettings.FirstOrDefaultAsync(ps => ps.UserId == post.UserId);
-            if (privacySettings == null || privacySettings.CommentPrivacy == CommentPrivacy.Nobody)
-            {
-                return BadRequest("Commenting is not allowed on this post.");
-            }
-
-            // Create a new comment
-            var comment = new Comment
-            {
-                PostId = postId,
-                UserId = userId, // Get the user's ID from claims
-                Text = commentText,
-                CommentDate = DateTime.Now // You might want to adjust this according to your requirements
-            };
-
-            // Add the comment to the database
-            _context.Comments.Add(comment);
-            await _notificationService.CreateNotificationAsync("Comment", userId, post.UserId, postId);
-            await _context.SaveChangesAsync();
-
-            // Redirect back to the post detail page
-            var user = await _userManager.FindByIdAsync(post.UserId); // Retrieve the user associated with the post
-            return RedirectToAction("PostDetail", new { username = user.UserName, postId = postId });
-        }
-
-        [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> ToggleLike(int postId)
-        {
-            // Retrieve the post by postId
-            var post = await _context.Posts.FindAsync(postId);
-
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            // Get the currently logged-in user
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            // Check if the user has already liked the post
-            var existingLike = await _context.Likes.FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == currentUser.Id);
-
-            if (existingLike != null)
-            {
-                // User has already liked the post, so unlike it
-                _context.Likes.Remove(existingLike);
-
-                var existingNotification = await _context.Notifications.FirstOrDefaultAsync(n =>
-                    n.NotificationType == "Like" &&
-                    n.UserIdTriggered == currentUser.Id &&
-                    n.PostId == postId);
-
-                if (existingNotification != null)
-                {
-                    _context.Notifications.Remove(existingNotification);
-                }
-            }
-            else
-            {
-                // User has not liked the post yet, so add a like
-                var like = new Like
-                {
-                    PostId = postId,
-                    UserId = currentUser.Id,
-                    LikeDate = DateTime.Now, // You might want to adjust this according to your requirements
-                };
-                _context.Likes.Add(like);
-                await _notificationService.CreateNotificationAsync("Like", currentUser.Id, post.UserId, postId);
-            }
-
-            // Save changes to the database
-            await _context.SaveChangesAsync();
-
-            // Redirect back to the post detail page
-            var likeCount = await _context.Likes.CountAsync(l => l.PostId == postId);
-
-            var user = await _userManager.FindByIdAsync(post.UserId); // Retrieve the user associated with the post
-            return RedirectToAction("PostDetail", new { username = user.UserName, postId = postId});
-        }
-
-        [HttpPost]
-        [Authorize]
-        [Route("Profile/DeletePost")]
-        public async Task<IActionResult> DeletePost(int postId)
-        {
-            var post = await _context.Posts.FindAsync(postId);
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            // Check authorization
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (post.UserId != currentUser.Id)
-            {
-                return Forbid(); // User is not authorized to delete this post
-            }
-
-            // Delete related likes, comments, and notifications
-            _context.Likes.RemoveRange(_context.Likes.Where(l => l.PostId == postId));
-            _context.Comments.RemoveRange(_context.Comments.Where(c => c.PostId == postId));
-            _context.Notifications.RemoveRange(_context.Notifications.Where(n => n.PostId == postId));
-
-            // Delete the post
-            _context.Posts.Remove(post);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index", new { username = currentUser.UserName });
-        }
-
-        [HttpPost]
-        [Authorize]
-        [Route("Profile/EditCaption")]
-        public async Task<IActionResult> EditCaption(int postId, string captionText)
-        {
-            var post = await _context.Posts.FindAsync(postId);
-            if (post == null)
-            {
-                return NotFound();
-            }
-
-            // Check authorization
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (post.UserId != currentUser.Id)
-            {
-                return Forbid(); // User is not authorized to edit this post
-            }
-
-            // Update the caption
-            post.Caption = captionText;
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("PostDetail", new { username = post.User.UserName, postId = postId });
-        }
-
-        [HttpGet]
-        [Authorize]
-        [Route("Explore/Hashtag/{hashtag}")]
-        public async Task<IActionResult> PostsByHashtag(string hashtag)
-        {
-            // Retrieve posts containing the hashtag
-            var posts = await _context.Posts
-                .Where(p => p.Caption.Contains(hashtag))
-                .Include(p => p.User) // Include the User navigation property to access user details
-                .ToListAsync();
-
-            // Convert posts to PostInfo objects
-            var postInfos = posts.Select(post => new PostInfo
-            {
-                Post = post,
-                User = post.User,
-
-                // You may need to populate other properties like IsLiked, LikeCount, Likers, Comments, etc.
-            }).ToList();
-
-            // Pass the hashtag and postInfos to the view
-            ViewBag.Hashtag = hashtag;
-
-            return View(postInfos);
-        }
-
-
 
         [HttpGet]
         [Authorize]
@@ -413,55 +167,6 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             return View(model);
         }
 
-        [HttpGet]
-        [Authorize]
-        [Route("Explore")]
-        public async Task<IActionResult> Explore()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-
-            // Get IDs of users whom the current user is following
-            var followingIds = await _context.Follows
-                .Where(f => f.FollowerId == currentUser.Id)
-                .Select(f => f.FolloweeId)
-                .ToListAsync();
-
-            // Get IDs of users who have private accounts
-            var privateUserIds = await _context.Users
-                .Where(u => u.IsPrivate)
-                .Select(u => u.Id)
-                .ToListAsync();
-
-            // Get all posts from users whom the current user is following or who don't have private accounts
-            var filteredPosts = await _context.Posts
-                .Include(p => p.User)
-                .Where(p => !privateUserIds.Contains(p.UserId) || followingIds.Contains(p.UserId))
-                .ToListAsync();
-
-            const double likeWeight = 1.0;
-            const double commentWeight = 2.0;
-
-            // Calculate followerScore for filtered posts
-            var postsWithScores = filteredPosts.Select(post =>
-            {
-                var likeCount = _context.Likes.Count(l => l.PostId == post.Id);
-                var commentCount = _context.Comments.Count(c => c.PostId == post.Id);
-                var interactions = (likeWeight * likeCount) + (commentWeight * commentCount);
-                var followerCount = _context.Follows.Count(f => f.FolloweeId == post.User.Id);
-                var followerScore = followerCount > 0 ? interactions * followerCount : 1;
-
-                return new
-                {
-                    Post = post,
-                    FollowerScore = followerScore
-                };
-            });
-
-            // Sort filtered posts by followerScore in descending order
-            var sortedPosts = postsWithScores.OrderByDescending(p => p.FollowerScore).Select(p => p.Post);
-
-            return View(sortedPosts);
-        }
 
         [HttpGet]
         [Authorize]
@@ -490,20 +195,15 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
                 .Where(u => u.UserName.Contains(query) && !u.UserName.StartsWith(query))
                 .ToListAsync();
 
-            // Extract the hashtag from the query
-            // Check if the query starts with "#" and remove "#" if present
             var hashtag = query.StartsWith("#") ? query.Substring(1) : query;
 
-            // Retrieve posts containing the exact hashtag
             var posts = await _context.Posts
                 .Where(p => p.Caption.Contains($"#{hashtag} ") || p.Caption.EndsWith($"#{hashtag}"))
                 .ToListAsync();
 
 
-            // Get the count of posts for the hashtag
             var hashtagCount = posts.Count;
 
-            // Combine the search results
             var model = new SearchViewModel
             {
                 Query = query,
@@ -578,10 +278,27 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
         {
             var currentUser = await _userManager.GetUserAsync(User);
 
+            var privacySettings = await _context.PrivacySettings
+                .FirstOrDefaultAsync(ps => ps.UserId == currentUser.Id);
+
+            // If privacy settings don't exist, create a new one with default values
+            if (privacySettings == null)
+            {
+                privacySettings = new PrivacySettings
+                {
+                    UserId = currentUser.Id,
+                    IsPrivate = currentUser.IsPrivate,
+                    CommentPrivacy = CommentPrivacy.Everybody  // Set default value here
+                };
+                _context.PrivacySettings.Add(privacySettings);
+                await _context.SaveChangesAsync();  // Save the new settings
+            }
+
             var viewModel = new PrivacySettingsViewModel
             {
                 UserId = currentUser.Id, // Assuming UserId is a property of the PrivacySettingsViewModel
-                IsPrivate = currentUser.IsPrivate // Assuming IsPrivate is a property of the ApplicationUser representing the current user
+                IsPrivate = currentUser.IsPrivate, // Assuming IsPrivate is a property of the ApplicationUser representing the current user
+                CommentPrivacy = privacySettings.CommentPrivacy
             };
 
             return View(viewModel);
@@ -603,6 +320,85 @@ namespace Hryhoriichuk.University.Instagram.Web.Controllers
             return Json(new { success = false });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateCommentPrivacy(int commentPrivacy)
+        {
+            Console.WriteLine($"Received commentPrivacy value: {commentPrivacy}");
+            var currentUser = await _userManager.GetUserAsync(User);
+
+            if (currentUser != null)
+            {
+                // Retrieve the current user's privacy settings from the database
+                var privacySettings = await _context.PrivacySettings.FirstOrDefaultAsync(ps => ps.UserId == currentUser.Id);
+
+                // If privacy settings don't exist, create a new one
+                if (privacySettings == null)
+                {
+                    privacySettings = new PrivacySettings
+                    {
+                        UserId = currentUser.Id,
+                        IsPrivate = currentUser.IsPrivate,
+                        CommentPrivacy = CommentPrivacy.Everybody
+                    };
+                    _context.PrivacySettings.Add(privacySettings);
+                }
+
+                // Update the comment privacy setting
+                privacySettings.CommentPrivacy = (CommentPrivacy)commentPrivacy;
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+
+            return Json(new { success = false });
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("Profile/Dashboard")]
+        public IActionResult Dashboard()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("Profile/DashboardAnalytics")]
+        public async Task<IActionResult> DashboardAnalytics()
+        {
+            // Get the current user's ID
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Filter likes and comments by posts created by the current user
+            var totalLikes = await _context.Likes
+                .CountAsync(l => l.Post.UserId == userId);
+            var totalComments = await _context.Comments
+                .CountAsync(c => c.Post.UserId == userId);
+
+            var topPosts = await _context.Posts
+                .Where(p => p.UserId == userId)
+                .OrderByDescending(p => p.Likes.Count + p.Comments.Count())
+                .Take(3)
+                .Select(p => new {
+                    PostId = p.Id,
+                    p.Caption,
+                    LikeCount = p.Likes.Count,
+                    commentCount = p.Comments.Count,
+                    UserName = p.User.UserName,
+                    p.DatePosted,
+                    imagePath = p.ImagePath,
+                })
+                .ToListAsync();
+
+            return Json(new
+            {
+                totalLikes,
+                totalComments,
+                topPosts
+            });
+        }
 
     }
 

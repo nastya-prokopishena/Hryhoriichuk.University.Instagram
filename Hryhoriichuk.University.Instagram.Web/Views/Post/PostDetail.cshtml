@@ -157,20 +157,26 @@
                             {
                                 <div class="dropdown ellipsis-dropdown">
                                     <button class="btn btn-secondary dropdown-toggle" type="button" id="ellipsisDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        ...
+                                        <i class="bi bi-three-dots"></i>
                                     </button>
-                                    <div class="dropdown-menu" aria-labelledby="ellipsisDropdown">
-                                        <form action="@Url.Action("EditCaption", "Profile")" method="post">
+                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="ellipsisDropdown">
+                                        <form action="@Url.Action("EditCaption", "Post")" method="post" class="dropdown-item">
                                             <input type="hidden" name="postId" value="@Model.Id" />
-                                            <input type="text" name="captionText" placeholder="Enter new caption" required />
-                                            <button type="submit" class="dropdown-item">Edit Caption</button>
+                                            <input type="text" name="captionText" class="form-control mb-2" placeholder="Enter new caption" required />
+                                            <button type="submit" class="btn btn-primary btn-block">Edit Caption</button>
                                         </form>
-                                        <form action="@Url.Action("DeletePost", "Profile")" method="post">
+                                        <div class="dropdown-divider"></div>
+                                        <form action="@Url.Action("DeletePost", "Post")" method="post" class="dropdown-item">
                                             <input type="hidden" name="postId" value="@Model.Id" />
-                                            <button type="submit" class="dropdown-item">Delete Post</button>
+                                            <button type="submit" class="btn btn-danger btn-block">Delete Post</button>
                                         </form>
                                     </div>
                                 </div>
+
+                                <a href="#" class="insights-link btn btn-outline-primary" data-post-id="@Model.Id">
+                                    Insights <i class="bi bi-bar-chart"></i>
+                                </a>
+
                             }
                         </div>
                         <img src="@Model.ImagePath" class="post-image" alt="Post Image">
@@ -185,7 +191,7 @@
                                         if (i > 0)
                                         {
                                             var hashtag = segment.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).First();
-                                            <a href="@Url.Action("PostsByHashtag", "Profile", new { hashtag = hashtag })" style="color: blue;">#@(hashtag)</a>
+                                            <a href="@Url.Action("PostsByHashtag", "Post", new { hashtag = hashtag })" style="color: blue;">#@(hashtag)</a>
                                             @segment.Substring(hashtag.Length)
                                         }
                                         else
@@ -258,20 +264,26 @@ else
                         {
                             <div class="dropdown ellipsis-dropdown">
                                 <button class="btn btn-secondary dropdown-toggle" type="button" id="ellipsisDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    ...
+                                    <i class="bi bi-three-dots"></i>
                                 </button>
-                                <div class="dropdown-menu" aria-labelledby="ellipsisDropdown">
-                                    <form action="@Url.Action("EditCaption", "Profile")" method="post">
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="ellipsisDropdown">
+                                    <form action="@Url.Action("EditCaption", "Post")" method="post" class="dropdown-item">
                                         <input type="hidden" name="postId" value="@Model.Id" />
-                                        <input type="text" name="captionText" placeholder="Enter new caption" required />
-                                        <button type="submit" class="dropdown-item">Edit Caption</button>
+                                        <input type="text" name="captionText" class="form-control mb-2" placeholder="Enter new caption" required />
+                                        <button type="submit" class="btn btn-primary btn-block">Edit Caption</button>
                                     </form>
-                                    <form action="@Url.Action("DeletePost", "Profile")" method="post">
+                                    <div class="dropdown-divider"></div>
+                                    <form action="@Url.Action("DeletePost", "Post")" method="post" class="dropdown-item">
                                         <input type="hidden" name="postId" value="@Model.Id" />
-                                        <button type="submit" class="dropdown-item">Delete Post</button>
+                                        <button type="submit" class="btn btn-danger btn-block">Delete Post</button>
                                     </form>
                                 </div>
                             </div>
+
+                            <a href="#" class="insights-link btn btn-outline-primary" data-post-id="@Model.Id">
+                                Insights <i class="bi bi-bar-chart"></i>
+                            </a>
+
                         }
                     </div>
                     <img src="@Model.ImagePath" class="post-image" alt="Post Image">
@@ -286,7 +298,7 @@ else
                                     if (i > 0)
                                     {
                                         var hashtag = segment.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).First();
-                                        <a href="@Url.Action("PostsByHashtag", "Profile", new { hashtag = hashtag })" style="color: blue;">#@(hashtag)</a>
+                                        <a href="@Url.Action("PostsByHashtag", "Post", new { hashtag = hashtag })" style="color: blue;">#@(hashtag)</a>
                                         @segment.Substring(hashtag.Length)
                                     }
                                     else
@@ -391,6 +403,34 @@ else
             }
         });
     </script>
+
+    <!-- Include jQuery and Bootstrap JS for modal functionality -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).on('click', '.insights-link', function (e) {
+            e.preventDefault();
+
+            var postId = $(this).data('post-id');
+
+            $.ajax({
+                url: '/PostInsights',
+                type: 'GET',
+                data: { postId: postId },
+                success: function (data) {
+                    $('#insightsModal').remove();
+                    $('body').append(data);
+                    $('#insightsModal').modal('show');
+                },
+                error: function () {
+                    alert('Failed to load insights.');
+                }
+            });
+        });
+    </script>
+
+
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 }

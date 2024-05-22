@@ -1,0 +1,100 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.PostInsightsViewModel
+
+<div class="modal" tabindex="-1" role="dialog" id="insightsModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Post Insights</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img src="@Model.Post.ImagePath" alt="Post Image" class="post-image-icon mr-3">
+                <div class="post-insights">
+                    <div class="post-header d-flex align-items-center mb-3">
+                        <div>
+                            <p class="mb-0"><strong>@Model.Post.User.UserName</strong></p>
+                            <p class="text-muted mb-0">Post ID: @Model.PostId</p>
+                            <p class="text-muted mb-0">Posted @Model.Post.DatePosted.ToString("dd MMM yyyy 'at' HH:mm")</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="post-metrics d-flex justify-content-around">
+                        <div class="likes">
+                            <i class="bi bi-heart-fill text-danger"></i> @Model.LikeCount
+                        </div>
+                        <div class="comments">
+                            <i class="bi bi-chat-fill text-primary"></i> @Model.CommentCount
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add your custom CSS styles -->
+<style>
+    .post-insights {
+        text-align: center;
+    }
+
+    .post-header {
+        display: flex;
+        align-items: center;
+        text-align: left;
+    }
+
+    .post-image-icon {
+        height: 150px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+
+    .post-metrics {
+        display: flex;
+        justify-content: space-around;
+        font-size: 1.2rem;
+        margin-top: 20px;
+    }
+
+        .post-metrics .likes,
+        .post-metrics .comments {
+            display: flex;
+            align-items: center;
+        }
+
+        .post-metrics i {
+            margin-right: 5px;
+        }
+
+    .modal-content {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #dee2e6;
+    }
+
+    .modal-title {
+        font-weight: bold;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+    }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+</style>

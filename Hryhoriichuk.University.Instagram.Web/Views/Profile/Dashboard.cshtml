@@ -1,0 +1,90 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<style>
+    .post-image {
+        position: relative;
+        width: 100%;
+        padding-top: 100%; /* Maintain aspect ratio of 1:1 */
+        overflow: hidden;
+    }
+
+        .post-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* Ensure the image fills the square */
+            object-fit: cover; /* Cover the entire area */
+        }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block sidebar bg-dark text-white">
+            <div class="sidebar-sticky">
+                <h4 class="pt-3 pb-3">Dashboard</h4>
+            </div>
+        </nav>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4 main-content">
+            <h2 class="mt-4">Overview</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Likes <i class="bi bi-heart-fill text-danger"></i></h5>
+                            <p class="card-text" id="totalLikes">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Total Comments <i class="bi bi-chat-left-text-fill text-primary"></i></h5>
+                            <p class="card-text" id="totalComments">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h2 class="mt-5">Top Posts</h2>
+            <div class="row" id="topPosts">
+                <!-- Top posts will be populated here -->
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('DashboardAnalytics')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('totalLikes').innerText = data.totalLikes;
+                document.getElementById('totalComments').innerText = data.totalComments;
+
+                var topPostsContainer = document.getElementById('topPosts');
+                topPostsContainer.innerHTML = data.topPosts.map(post => `
+                        <div class="col-md-4">
+                            <div class="card mb-4 shadow-sm">
+                                <div class="post-image">
+                                    <img src="${post.imagePath}" class="card-img-top" alt="Post Image">
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">${post.caption}</h5>
+                                    <p class="card-text">
+                                        <i class="bi bi-heart-fill text-danger"></i> ${post.likeCount}
+                                        <i class="bi bi-chat-left-text-fill text-primary"></i> ${post.commentCount}
+                                    </p>
+                                    <p class="card-text">Posted on: ${new Date(post.datePosted).toLocaleString()}</p>
+                                    <a href="/Profile/${post.userName}/${post.postId}" class="btn btn-primary">View Post</a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+            })
+            .catch(error => console.error('Error fetching analytics data:', error));
+    });
+</script>

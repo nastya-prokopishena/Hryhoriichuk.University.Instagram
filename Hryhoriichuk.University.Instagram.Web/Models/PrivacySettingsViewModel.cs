@@ -4,6 +4,6 @@
     {
         public string UserId { get; set; }
         public bool IsPrivate { get; set; }
-        public int CommentPrivacy { get; set; }
+        public CommentPrivacy CommentPrivacy { get; set; }
     }
 }
