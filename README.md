@@ -89,3 +89,10 @@ Add your task decomposition here.
 - Develop backend logic for creating and displaying stories ✔️
 - Implement time-based story expiration ✔️
 - Write unit tests for story functionalities
+
+### Week 11:
+- Implement feature: Privacy Settings ✔️
+- Design UI for privacy settings page ✔️
+- Develop backend logic for managing privacy preferences ✔️
+- Integrate privacy settings with user profiles and posts ✔️
+- Write unit tests for privacy settings functionalities
