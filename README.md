@@ -96,3 +96,10 @@ Add your task decomposition here.
 - Develop backend logic for managing privacy preferences ✔️
 - Integrate privacy settings with user profiles and posts ✔️
 - Write unit tests for privacy settings functionalities
+
+### Week 12:
+- Implement feature: Analytics ✔️
+- Design UI for analytics dashboard ✔️
+- Develop backend logic for collecting and analyzing post metrics ✔️
+- Implement data visualization for post performance insights ✔️
+- Write unit tests for analytics functionalities
