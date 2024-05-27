@@ -1,9 +1,9 @@
 # DenisInstASP
 
-Example
-This is an example project for the university students, a good start for a great project or just to test something.
+Instagram
+This is my Instagram-like web app, where you can share media, follow users, like & comment on their posts.
 
-https://exampleproject.azurewebsites.net
+https://instbyden.azurewebsites.net
 ## Author
 Denys Hryhoriichuk
 
