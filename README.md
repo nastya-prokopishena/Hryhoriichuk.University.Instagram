@@ -103,3 +103,9 @@ Add your task decomposition here.
 - Develop backend logic for collecting and analyzing post metrics ✔️
 - Implement data visualization for post performance insights ✔️
 - Write unit tests for analytics functionalities
+
+
+## Anti-Lab 2
+### Anastasiia Prokopishena
+- **Project link** https://github.com/nastya-prokopishena/Prokopishena.University.Personalized-Fitness-Coaching-Platform.git
+- **Pull request link** https://github.com/nastya-prokopishena/Hryhoriichuk.University.Instagram
