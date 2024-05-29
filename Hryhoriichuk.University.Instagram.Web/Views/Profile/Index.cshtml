@@ -1,0 +1,300 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.Profile
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    .profile-container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .profile-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .profile-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .username {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .full-name {
+        font-size: 18px;
+    }
+
+    .email {
+        font-style: italic;
+    }
+
+    .posts-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 10px;
+    }
+
+    .post-card {
+        position: relative;
+        width: 100%;
+        padding-top: 100%; /* Maintain aspect ratio of 1:1 */
+        overflow: hidden;
+    }
+
+    .post-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        cursor: pointer;
+    }
+
+    .post-caption {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        padding: 10px;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+        display: none;
+    }
+
+    .post-card:hover .post-caption {
+        display: block;
+    }
+
+    .profile-image-container {
+        position: relative;
+        display: inline-block; /* Ensure the container fits its content */
+    }
+
+    .active-story-indicator {
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        width: calc(100% + 10px);
+        height: calc(100% + 10px);
+        border-radius: 50%;
+        border: 5px solid #ff6347; /* Adjust the color as needed */
+        z-index: 1; /* Ensure it's above the profile picture */
+        box-sizing: border-box;
+    }
+
+    .private-profile-info {
+        display: none;
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-image-container" onclick="openActiveStoriesModal('@Url.Action("StoryView", "Profile", new { userId = Model.Id })')">
+        @if (Model.Stories != null && Model.Stories.Any(s => DateTime.Now >= s.PostedAt && DateTime.Now <= s.ExpiresAt))
+        {
+            <div class="active-story-indicator"></div>
+        }
+        <img src="@Model.ProfilePicturePath" alt="Profile Picture" class="profile-image" />
+    </div>
+    <div class="profile-info">
+        <div class="username">@Model.UserName</div>
+        <div class="full-name">@Model.FullName</div>
+        <div class="email">@Model.Email</div>
+        <div>
+            <span class="followers-count" data-type="followers">@ViewBag.FollowersCount followers</span> |
+            <span class="followings-count" data-type="followings">@ViewBag.FollowingsCount followings</span>
+        </div>
+
+        <div id="followerFollowingModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Followers and Followings</h2>
+                <div id="followersFollowingsList">
+                </div>
+            </div>
+        </div>
+
+        @if (!(ViewData["IsCurrentUserProfile"] as bool? == true))
+        {
+            @if (Model.IsPrivate && !Model.IsFollowing)
+            {
+                @if (ViewData["HasPendingFollowRequest"] as bool? ?? false)
+                {
+                    <hr />
+                    <p>Your follow request is pending.</p>
+
+                    <form id="cancelFollowRequestForm" method="post" action="@Url.Action("CancelFollowRequest", "Follow")">
+                        <input type="hidden" name="userIdToCancelRequest" value="@Model.Id" />
+                        <button type="submit" class="btn btn-danger mt-2">Cancel Follow Request</button>
+                    </form>
+                }
+                else
+                {
+                    <form id="sendFollowRequestForm" method="post" action="@Url.Action("SendFollowRequest", "Follow")">
+                        <input type="hidden" name="userIdToFollow" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary mt-2">Send Follow Request</button>
+                    </form>
+
+                    <hr />
+
+                    <div style="display: flex; align-items: center;">
+                        <i class="bi bi-lock-fill text-danger" style="font-size: 1.5rem; margin-right: 10px;"></i>
+                        <h5>This profile is private. Send request to follow them!</h5>
+                    </div>
+                }
+            }
+        }
+        @if (ViewData["IsCurrentUserProfile"] as bool? == true)
+        {
+            <!-- Add elements specific to the current user's profile -->
+            <a href="#">Edit Profile</a>
+            <a href="@Url.Action("Dashboard", "Profile")" class="btn btn-info mt-2">Open Dashboard</a>
+        }
+        @if (!(ViewData["IsCurrentUserProfile"] as bool? == true) && !((Model.IsPrivate && !Model.IsFollowing)))
+        {
+            <form id="messageForm" method="post" action="@Url.Action("NewChat", "Message")">
+                <input type="hidden" name="username" value="@Model.UserName" />
+                <button type="submit" class="btn btn-primary mt-2">Message</button>
+            </form>
+            <!-- Add elements specific to other users' profiles -->
+            <form id="followForm" method="post" action="@Url.Action("Follow", "Follow")">
+                <input type="hidden" name="userIdToFollow" value="@Model.Id" />
+                <button type="submit" class="btn btn-primary mt-2">
+                    @if (Model.IsFollowing)
+                    {
+                        <text>Unfollow</text>
+                    }
+                    else
+                    {
+                        <text>Follow</text>
+                    }
+                </button>
+            </form>
+
+        }
+    </div>
+</div>
+
+@if ((Model.IsPrivate && !Model.IsFollowing) == false || (ViewData["IsCurrentUserProfile"] as bool? == true))
+{
+    <hr />
+
+    <div class="profile-info">
+        <h4>Posts</h4>
+        @if (Model.Posts != null && Model.Posts.Any())
+        {
+            <div class="posts-grid">
+                @foreach (var post in Model.Posts.OrderByDescending(p => p.DatePosted))
+                {
+                    <div class="post-card">
+                        <a href="@Url.Action("PostDetail", "Post", new { username = Model.UserName, postId = post.Id })">
+                            <div class="post-image" style="background-image: url('@post.ImagePath')"></div>
+                            <div class="post-caption">@post.Caption</div>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p>No posts found.</p>
+        }
+    </div>
+}
+
+
+
+@section scripts {
+    <script>
+        // Function to close the story modal
+        function closeStoryModal() {
+            console.log('Closing story modal...');
+            var modal = document.getElementById('storyModal');
+            // Check if the modal is open
+            if (modal) {
+                // Clear the modal content
+                document.querySelector('.modal-content').innerHTML = '';
+                // Hide the modal
+                modal.style.display = 'none';
+            }
+        }
+
+        // Close the modal when clicking on the close button
+        document.querySelector('.close').addEventListener('click', closeStoryModal);
+
+        // Close the modal when clicking outside the modal content
+        window.onclick = function (event) {
+            var modal = document.getElementById('storyModal');
+            if (event.target == modal) {
+                console.log('Clicked outside story modal, closing...');
+                closeStoryModal();
+            }
+        }
+
+        // Function to open the modal and load the active stories
+        function openActiveStoriesModal(url) {
+            console.log('Opening active stories modal...');
+            // Close any previously open modal
+            closeStoryModal();
+            // Fetch the active stories and display them in the modal
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text(); // Get the response as text
+                })
+                .then(html => {
+                    console.log('Active stories modal HTML:', html);
+                    // Construct a div element to contain the HTML content
+                    const container = document.createElement('div');
+                    container.innerHTML = html; // Set the HTML content
+                    // Append the HTML content to the body
+                    document.body.appendChild(container);
+                    // Show the modal
+                    document.getElementById('storyModal').style.display = 'block';
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+
+
+        // Function to navigate to the previous or next story within the modal
+        function navigateStory(direction) {
+            console.log('Navigating story:', direction); // Log the direction
+            let currentStoryIdElement = document.getElementById('currentStoryId');
+            if (currentStoryIdElement) {
+                let currentStoryId = parseInt(currentStoryIdElement.innerText);
+
+                // Determine the URL for the next or previous story
+                let url = direction === 'prev' ? `/Profile/StoryView/${currentStoryId - 1}` : `/Profile/StoryView/${currentStoryId + 1}`;
+
+                // Fetch the next or previous story
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        // Update the modal content with the new story
+                        document.querySelector('.modal-content').innerHTML = html;
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+}

@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hryhoriichuk.University.Instagram.Web", "Hryhoriichuk.University.Instagram.Web\Hryhoriichuk.University.Instagram.Web.csproj", "{4CC9A013-D8C7-4CAC-AFE2-6DB8C6DB3CEA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hryhoriichuk.University.Instagram.Core", "Hryhoriichuk.University.Instagram.Core\Hryhoriichuk.University.Instagram.Core.csproj", "{4712F45D-EE90-4027-9E84-6C9B7E1FFDEF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hryhoriichuk.University.Instagram.Models", "Hryhoriichuk.University.Instagram.Models\Hryhoriichuk.University.Instagram.Models.csproj", "{FFD1E09D-CE7D-4528-ADA5-3CE477D7F382}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hryhoriichuk.University.Instagram.Test", "Hryhoriichuk.University.Instagram.Test\Hryhoriichuk.University.Instagram.Test.csproj", "{35251373-7D9F-4A10-93B9-02234DE0EF62}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4DCC50E2-A175-4A31-B38A-93E66E1BE70B}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hryhoriichuk.University.Instagram.Database", "Hryhoriichuk.University.Instagram.Database\Hryhoriichuk.University.Instagram.Database.csproj", "{E415C6FC-7903-40EF-9AE7-B7CB26B69842}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4CC9A013-D8C7-4CAC-AFE2-6DB8C6DB3CEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CC9A013-D8C7-4CAC-AFE2-6DB8C6DB3CEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CC9A013-D8C7-4CAC-AFE2-6DB8C6DB3CEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CC9A013-D8C7-4CAC-AFE2-6DB8C6DB3CEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4712F45D-EE90-4027-9E84-6C9B7E1FFDEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4712F45D-EE90-4027-9E84-6C9B7E1FFDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4712F45D-EE90-4027-9E84-6C9B7E1FFDEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4712F45D-EE90-4027-9E84-6C9B7E1FFDEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFD1E09D-CE7D-4528-ADA5-3CE477D7F382}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFD1E09D-CE7D-4528-ADA5-3CE477D7F382}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFD1E09D-CE7D-4528-ADA5-3CE477D7F382}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFD1E09D-CE7D-4528-ADA5-3CE477D7F382}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35251373-7D9F-4A10-93B9-02234DE0EF62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35251373-7D9F-4A10-93B9-02234DE0EF62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35251373-7D9F-4A10-93B9-02234DE0EF62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35251373-7D9F-4A10-93B9-02234DE0EF62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E415C6FC-7903-40EF-9AE7-B7CB26B69842}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E415C6FC-7903-40EF-9AE7-B7CB26B69842}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E415C6FC-7903-40EF-9AE7-B7CB26B69842}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E415C6FC-7903-40EF-9AE7-B7CB26B69842}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5767A1CD-E624-44A2-BCB2-45617D5334E8}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,98 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.Post
+
+@{
+    Layout = "_Layout";
+}
+
+<!-- Include Cropper.js styles -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+
+<form asp-action="UploadMedia" method="post" enctype="multipart/form-data" id="upload-form">
+    <div class="form-group">
+        <label for="file">Upload Image:</label>
+        <input type="file" name="file" id="file" class="form-control-file">
+        <span asp-validation-for="file" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label for="caption">Caption:</label>
+        <input type="text" name="Caption" id="caption" class="form-control">
+    </div>
+    <!-- Image preview and cropping area -->
+    <div class="form-group">
+        <img id="image-preview" src="#" alt="Image Preview">
+    </div>
+    <!-- Aspect ratio selection -->
+    <div class="form-group">
+        <label>Aspect Ratio:</label><br>
+        <input type="radio" id="ratio11" name="aspectRatio" value="1" checked>
+        <label for="ratio11">1:1</label><br>
+        <input type="radio" id="ratio45" name="aspectRatio" value="4/5">
+        <label for="ratio45">4:5</label>
+    </div>
+    <!-- Crop confirmation -->
+    <div class="form-group">
+        <button type="button" id="confirm-crop" class="btn btn-primary">Confirm Crop</button>
+    </div>
+    <!-- Hidden input field for cropped image data -->
+    <input type="hidden" name="croppedImageData" id="cropped-image-data">
+    <!-- Upload button -->
+    <button type="submit" id="upload-btn" class="btn btn-primary" style="display: none;">Upload</button>
+</form>
+
+<!-- Include Cropper.js script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+<!-- Script for image preview and cropping -->
+<script>
+    window.addEventListener('DOMContentLoaded', function () {
+        var image = document.getElementById('image-preview');
+        var cropper;
+
+        document.getElementById('file').addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                image.src = event.target.result;
+                if (cropper) {
+                    cropper.destroy();
+                }
+                var aspectRatio = document.querySelector('input[name="aspectRatio"]:checked').value;
+                cropper = new Cropper(image, {
+                    aspectRatio: aspectRatio,
+                    viewMode: 1,
+                    zoomable: true,
+                    minContainerWidth: 200,
+                    minContainerHeight: 250
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.querySelectorAll('input[name="aspectRatio"]').forEach(function (input) {
+            input.addEventListener('change', function () {
+                var aspectRatio = this.value;
+                if (cropper) {
+                    cropper.setAspectRatio(aspectRatio);
+                }
+            });
+        });
+
+        document.getElementById('confirm-crop').addEventListener('click', function () {
+            if (!cropper) {
+                return;
+            }
+            var canvas = cropper.getCroppedCanvas();
+            if (!canvas) {
+                return;
+            }
+            // Convert the canvas to a base64 string
+            var croppedImageData = canvas.toDataURL('image/jpeg').replace(/^data:image\/(png|jpeg|jpg);base64,/, '');
+
+            // Set the cropped image data as a hidden input value
+            document.getElementById('cropped-image-data').value = croppedImageData;
+
+            // Trigger the form submission
+            document.getElementById('upload-form').submit();
+        });
+    });
+</script>

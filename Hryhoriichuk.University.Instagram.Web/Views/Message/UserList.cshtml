@@ -1,0 +1,163 @@
+﻿@model List<Hryhoriichuk.University.Instagram.Web.Areas.Identity.Data.ApplicationUser>
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    /* Your CSS styles here */
+    .chat-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .chat-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .profile-picture {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 20px;
+    }
+
+    .username {
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .last-message {
+        flex-grow: 1;
+    }
+
+    .new-chat-button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+        width: 80%;
+        max-width: 600px;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    .modal ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+        .modal ul li {
+            margin-bottom: 10px;
+        }
+
+            .modal ul li a {
+                display: block;
+                padding: 10px;
+                background-color: #f9f9f9;
+                border-radius: 5px;
+                text-decoration: none;
+                color: #333;
+                transition: background-color 0.3s;
+            }
+
+                .modal ul li a:hover {
+                    background-color: #ddd;
+                }
+</style>
+
+<h1>Chats</h1>
+
+<ul class="chat-list">
+    @foreach (var user in Model)
+    {
+        <li class="chat-item">
+            <img class="profile-picture" src="@user.ProfilePicturePath" alt="Profile Picture" />
+            <div>
+                <a class="username" href="@Url.Action("Chat", "Message", new { username = user.UserName })">@user.UserName</a>
+            </div>
+        </li>
+    }
+</ul>
+
+<button class="new-chat-button" id="startNewChatBtn">Start New Chat</button>
+
+<!-- Modal for selecting user -->
+<div class="modal" id="selectUserModal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Select User</h2>
+        <ul>
+            @foreach (var user in Model)
+            {
+                <li><a href="@Url.Action("Chat", "Message", new { username = user.UserName })">@user.UserName</a></li>
+            }
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Get the modal
+    var modal = document.getElementById("selectUserModal");
+
+    // Get the button that opens the modal
+    var btn = document.getElementById("startNewChatBtn");
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+
+    // When the user clicks on the button, open the modal
+    btn.onclick = function () {
+        modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>

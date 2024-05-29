@@ -1,0 +1,33 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.SearchViewModel
+
+<h1>Search Results for "@Model.Query"</h1>
+
+<h2>Users</h2>
+@if (Model.Users.Any())
+{
+    <ul>
+        @foreach (var user in Model.Users)
+        {
+            <li>@user.UserName - @user.FullName</li>
+        }
+    </ul>
+}
+else
+{
+    <p>No users found.</p>
+}
+
+<h2>Posts</h2>
+@if (Model.Posts.Any())
+{
+    <ul>
+        @foreach (var post in Model.Posts)
+        {
+            <li>@post.Caption</li>
+        }
+    </ul>
+}
+else
+{
+    <p>No posts found.</p>
+}

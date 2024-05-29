@@ -1,0 +1,125 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.SearchViewModel
+
+<style>
+
+    .hashtag-link {
+        text-decoration: none; /* Remove underline */
+        color: #333; /* Hashtag text color */
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px; /* Adjust spacing between hashtags */
+    }
+
+        .hashtag-link:hover {
+            color: blue; /* Hashtag text color on hover */
+        }
+
+
+    .hashtag-text {
+        font-weight: bold; /* Bold hashtag text */
+    }
+
+    .post-count {
+        margin-left: 5px; /* Adjust spacing between hashtag text and post count */
+        color: #777; /* Post count text color */
+    }
+
+
+    .user-list {
+        display: flex;
+        flex-direction: column; /* Display users in a vertical column */
+        gap: 5px;
+    }
+
+    .user-item {
+        margin-bottom: 5px;
+    }
+
+    .user-link {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f0f0f0; /* Adjust the background color */
+        text-decoration: none;
+        color: #333;
+    }
+
+    .profile-picture {
+        width: 30px; /* Adjust the size of the profile picture */
+        height: 30px;
+        border-radius: 50%; /* Make the profile picture circular */
+        margin-right: 10px; /* Add spacing between profile picture and username */
+    }
+
+    .username {
+        font-size: 14px; /* Adjust the font size of the username */
+        font-weight: bold;
+    }
+
+    .hashtag {
+        color: blue; /* Hashtag color */
+    }
+
+    #load-more-users {
+        margin-top: 20px;
+    }
+
+        #load-more-users button {
+            width: 100%;
+        }
+</style>
+
+@if (Model.Users != null && Model.Users.Any())
+{
+    <div class="user-list">
+        @foreach (var user in Model.Users)
+        {
+            <!-- Display users in separate rows -->
+            <div class="user-item">
+                <a href="/Profile/@user.UserName" class="user-link">
+                    <!-- Link to user's profile -->
+                    <img src="@user.ProfilePicturePath" alt="Profile Picture" class="profile-picture" /> <!-- Display profile picture -->
+                    <span class="username">@user.UserName</span> <!-- Display username -->
+                </a>
+            </div>
+        }
+    </div>
+    <div id="load-more-users" style="display: none;">
+        <!-- Button to load more users -->
+        <button class="btn btn-primary">Load More</button>
+    </div>
+}
+else
+{
+    <p>No users found</p>
+}
+
+@if (Model.Hashtags != null && Model.Hashtags.Any())
+{
+    <ul>
+        @foreach (var hashtag in Model.Hashtags)
+        {
+            <!-- Display hashtags as links -->
+            @if (Model.HashtagCounts != null && Model.HashtagCounts.ContainsKey(hashtag) && Model.HashtagCounts[hashtag] > 0)
+            {
+                <li>
+                    <a href="@Url.Action("PostsByHashtag", "Profile", new { hashtag = hashtag })" class="hashtag-link">
+                        <i class="bi bi-hash"></i> <!-- Hashtag icon -->
+                        <span class="hashtag-text">@hashtag</span> <!-- Hashtag text -->
+                        <span class="post-count">(@Model.HashtagCounts[hashtag] posts)</span> <!-- Post count -->
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li>
+                    <i class="bi bi-hash"></i> <!-- Hashtag icon -->
+                    <span class="hashtag-text">@hashtag</span> <!-- Hashtag text -->
+                    <span class="post-count">(0 posts)</span> <!-- Post count -->
+                </li>
+            }
+        }
+    </ul>
+}
+

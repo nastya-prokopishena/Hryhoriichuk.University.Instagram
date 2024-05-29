@@ -1,0 +1,82 @@
+﻿@model IEnumerable<Hryhoriichuk.University.Instagram.Web.Models.Post>
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    /* Add your custom CSS styles here */
+    .container {
+        margin-top: 20px;
+    }
+
+    .post-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 20px;
+    }
+
+    .post-container {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .post-profile-picture {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+
+    .post-username {
+        font-weight: bold;
+        color: inherit; /* Inherit the color from the parent */
+        text-decoration: none; /* Remove underline */
+    }
+
+    .post-image {
+        max-width: 100%;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .post-caption {
+        margin-top: 10px;
+    }
+</style>
+
+<div class="container">
+    <div class="post-grid">
+        @foreach (var post in Model)
+        {
+            <div class="post-container">
+                <div class="post-header">
+                    <img src="@post.User.ProfilePicturePath" class="post-profile-picture" alt="Profile Picture">
+                    <a href="/Profile/@post.User.UserName" class="post-username">@post.User.UserName</a>
+                </div>
+                <img src="@post.ImagePath" class="post-image" alt="Post Image" data-username="@post.User.UserName" data-post-id="@post.Id">
+                <p class="post-caption">@post.Caption</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Add JavaScript code here to handle post click event
+        $(".post-image").click(function () {
+            var postId = $(this).data("post-id");
+            var username = $(this).data("username");
+            var url = "/Profile/" + username + "/" + postId;
+            window.location.href = url;
+        });
+    </script>
+}

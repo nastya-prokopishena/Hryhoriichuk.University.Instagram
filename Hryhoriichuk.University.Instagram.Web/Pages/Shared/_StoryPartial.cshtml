@@ -1,0 +1,153 @@
+﻿@model Hryhoriichuk.University.Instagram.Web.Models.StoryViewModel
+
+<style>
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 999; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%; /* Adjusted width */
+        max-width: 500px; /* Maximum width */
+    }
+
+    /* Close button */
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    /* User information */
+    .user-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .profile-picture {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+    }
+
+    .username {
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    /* Story image */
+    .story-image {
+        width: 100%;
+        height: auto;
+        margin-bottom: 10px;
+    }
+
+    /* Story details */
+    .story-details {
+        margin-bottom: 10px;
+    }
+
+    /* Story navigation */
+    .story-navigation {
+        text-align: center;
+    }
+
+    .prev,
+    .next {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        text-decoration: none;
+        color: black;
+        margin: 0 5px;
+        cursor: pointer; /* Change cursor to pointer */
+    }
+
+        .prev:hover,
+        .next:hover {
+            background-color: #ddd;
+        }
+</style>
+
+<div id="storyModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <span class="close">&times;</span>
+
+        <!-- User information -->
+        <div class="user-info">
+            <img src="@Model.ProfilePicturePath" alt="Profile Picture" class="profile-picture">
+            <div class="username">@Model.User.UserName</div>
+        </div>
+
+        <!-- Story media -->
+        <img src="@Model.MediaUrl" alt="Story" class="story-image">
+
+        <!-- Posted time and expiration -->
+        <div class="story-details">
+            <div class="posted-time">@Model.PostedAt.ToString("MMMM dd, yyyy HH:mm")</div>
+            <div class="expires-in">Expires in: @Model.ExpiresAt.Hours hours @Model.ExpiresAt.Minutes minutes</div>
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="story-navigation">
+            <button class="prev" onclick="navigateStory('prev')">Previous</button>
+            <button class="next" onclick="navigateStory('next')">Next</button>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Initialize current story index
+        let currentStoryIndex = 0;
+        const activeStories = @Html.Raw(Json.Serialize(Model.ActiveStories));
+
+        // Function to navigate to the previous or next story
+        function navigateStory(direction) {
+            if (direction === 'prev') {
+                currentStoryIndex = (currentStoryIndex - 1 + activeStories.length) % activeStories.length;
+            } else {
+                currentStoryIndex = (currentStoryIndex + 1) % activeStories.length;
+            }
+            // Update story details based on current index
+            updateStoryDetails();
+        }
+
+        // Function to update story details based on current index
+        function updateStoryDetails() {
+            const currentStory = activeStories[currentStoryIndex];
+            // Update story media, posted time, and expiration
+            document.querySelector('.story-image').src = currentStory.MediaUrl;
+            document.querySelector('.posted-time').textContent = currentStory.PostedAt;
+            // You can also update other details like posted time and expiration here
+        }
+
+        // Call updateStoryDetails initially to display the first story
+        updateStoryDetails();
+    </script>
+}

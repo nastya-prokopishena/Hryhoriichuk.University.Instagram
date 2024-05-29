@@ -1,0 +1,151 @@
+﻿@model List<Hryhoriichuk.University.Instagram.Web.Models.Post>
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    /* Add your custom CSS styles here */
+    .container {
+        margin-top: 20px;
+    }
+
+    .post-container {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        padding: 10px;
+    }
+
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .post-username {
+        margin-left: 10px;
+        font-weight: bold;
+        color: inherit; /* Inherit the color from the parent */
+        text-decoration: none;
+    }
+
+    .post-profile-picture {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .post-image {
+        max-width: 100%;
+        border-radius: 5px;
+    }
+
+    .post-caption {
+        margin-bottom: 10px;
+    }
+
+    .post-date {
+        font-style: italic;
+    }
+
+    .comment-container {
+        margin-top: 20px;
+    }
+
+    .comment {
+        margin-bottom: 10px;
+    }
+
+    .comment-username {
+        font-weight: bold;
+    }
+
+    .comment-input {
+        margin-top: 20px;
+        width: 100%;
+    }
+</style>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            @if (Model.Count == 0)
+            {
+                <div>No posts yet from people you follow.</div>
+            }
+            else
+            {
+                @foreach (var post in Model)
+                {
+                    <div class="post-container">
+                        <div class="post-header">
+                            <img src="@post.User.ProfilePicturePath" alt="Profile Picture" class="post-profile-picture">
+                            <a href="/Profile/@post.User.UserName" class="post-username">@post.User.UserName</a>
+                        </div>
+                        <img src="@post.ImagePath" class="post-image" alt="Post Image">
+                        <p class="post-caption">@post.Caption</p>
+                        <p class="post-date">Date Posted: @post.DatePosted.ToShortDateString()</p>
+
+                        <!-- Like button -->
+                        <form method="post" action="@Url.Action("ToggleLike", "Profile")">
+                            <input type="hidden" name="postId" value="@post.Id" />
+                            <button type="submit" class="btn btn-primary">Like</button>
+                        </form>
+
+                        <!-- Comment section -->
+                        <div class="comment-container">
+                            <!-- Display comments for the post -->
+                            @foreach (var comment in post.Comments)
+                            {
+                                <div class="comment">
+                                    <span class="comment-username">@comment.User.UserName:</span> @comment.Text
+                                </div>
+                            }
+
+                            <!-- Add a form for adding comments -->
+                            <form method="post" action="@Url.Action("AddComment", "Profile")">
+                                <input type="hidden" name="postId" value="@post.Id" />
+                                <textarea name="commentText" class="comment-input" placeholder="Add a comment"></textarea>
+                                <button type="submit" class="btn btn-primary">Post Comment</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        // Get the modal
+        var modal = document.getElementById('likersModal');
+
+        // Get the button that opens the modal
+        var likeCount = document.getElementById('likeCount');
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal
+        likeCount.onclick = function () {
+            if (PostInfo.LikeCount > 0) {
+                modal.style.display = "block";
+            }
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+}

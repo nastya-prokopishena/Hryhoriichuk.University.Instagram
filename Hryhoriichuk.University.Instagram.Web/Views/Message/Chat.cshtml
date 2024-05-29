@@ -1,0 +1,178 @@
+﻿@model List<Hryhoriichuk.University.Instagram.Web.Models.Message>
+
+@{
+    Layout = "_Layout";
+}
+
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        height: 100%;
+    }
+
+    .chat-header {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        width: 100%;
+        background-color: #f0f0f0;
+    }
+
+    .profile-picture {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 20px;
+    }
+
+    .username {
+        font-weight: bold;
+    }
+
+    .chat-messages {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        overflow-y: auto;
+        max-height: calc(100vh - 200px);
+        width: 100%;
+        padding: 20px;
+    }
+
+    .message {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        max-width: 70%;
+        position: relative;
+    }
+
+    .own-message {
+        align-self: flex-end;
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .other-message {
+        align-self: flex-start;
+        background-color: #f0f0f0;
+    }
+
+    .message-content {
+        word-wrap: break-word;
+    }
+
+    .message-time {
+        display: none; /* Initially hide the time */
+        position: absolute;
+        bottom: -15px;
+        right: 5px;
+        font-size: 12px;
+        color: #888;
+    }
+
+    .message:hover .message-time {
+        display: block; /* Show time on hover */
+    }
+
+    .day-divider {
+        margin-top: 20px;
+        border-top: 1px solid #ccc;
+        width: 100%;
+        text-align: center;
+        font-weight: bold;
+        color: #888;
+    }
+
+    .chat-footer {
+        width: 100%;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    #messageInput {
+        flex: 1;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+    }
+
+    #sendButton {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+</style>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <img class="profile-picture" src="@ViewData["OtherUserProfilePicture"]" alt="Profile Picture" />
+        <a class="username-link" href="/Profile/@ViewData["OtherUserName"]">
+            <span class="username">@ViewData["OtherUserName"]</span>
+        </a>
+    </div>
+
+    <div class="chat-messages">
+        @if (Model.Any())
+        {
+            DateTime lastDate = DateTime.MinValue;
+            foreach (var message in Model)
+            {
+                if (message.Timestamp.Date != lastDate)
+                {
+                    <div class="day-divider">@message.Timestamp.ToString("MMMM dd, yyyy")</div>
+                    lastDate = message.Timestamp.Date;
+                }
+
+                <div class="message @(message.Sender.UserName == User.Identity.Name ? "own-message" : "other-message")">
+                    <div class="message-content">@message.Content</div>
+                    <div class="message-time">@message.Timestamp.ToString("HH:mm")</div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="chat-footer">
+        <input type="text" id="messageInput" placeholder="Type your message..." />
+        <button id="sendButton">Send</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#sendButton").click(function () {
+                var messageContent = $("#messageInput").val();
+                if (messageContent.trim() !== "") {
+                    $.post("/Message/SendMessage", { receiverUsername: "@ViewData["OtherUserName"]", messageContent: messageContent })
+                        .done(function () {
+                            var messageDiv = $("<div>").addClass("message own-message").append($("<div>").addClass("message-content").text(messageContent))
+                                .append($("<div>").addClass("message-time").text(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })));
+                            $(".chat-messages").append(messageDiv);
+                            $("#messageInput").val("");
+                            $(".chat-messages").scrollTop($(".chat-messages")[0].scrollHeight);
+                        })
+                        .fail(function () {
+                            console.error("Failed to send message.");
+                        });
+                }
+            });
+
+            $(document).on("keydown", "#messageInput", function (e) {
+                if (e.keyCode === 13) {
+                    $("#sendButton").click();
+                }
+            });
+        });
+    </script>
+}

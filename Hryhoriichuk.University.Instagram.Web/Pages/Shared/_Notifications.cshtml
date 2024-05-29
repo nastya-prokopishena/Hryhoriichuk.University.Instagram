@@ -1,0 +1,42 @@
+﻿@model List<Hryhoriichuk.University.Instagram.Web.Models.Notification>
+
+<style>
+    /* Add your custom CSS styles for the notifications menu */
+    .dropdown-menu {
+        min-width: 20rem;
+    }
+
+    .list-group-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .badge {
+        margin-left: auto;
+    }
+</style>
+
+<div class="dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Notifications
+    </a>
+    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+        @if (Model != null && Model.Any())
+        {
+            <ul class="list-group">
+                @foreach (var notification in Model)
+                {
+                    <li class="list-group-item">
+                        @Html.Raw(notification.Message)
+                        <span class="badge badge-primary">@notification.Timestamp.ToString("mm")</span>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="dropdown-item-text">No notifications</p>
+        }
+    </div>
+</div>

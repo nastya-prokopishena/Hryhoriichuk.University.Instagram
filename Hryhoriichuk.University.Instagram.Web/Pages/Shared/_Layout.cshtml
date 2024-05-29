@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Hryhoriichuk.Instagram</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Hryhoriichuk.University.Instagram.Web.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="~/lib/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <style>
+        .dropdown-menu {
+            max-height: 300px; /* Set a maximum height for the dropdown menu */
+            overflow-y: auto; /* Enable vertical scrolling if needed */
+            width: 300px; /* Set the width of the dropdown menu */
+        }
+
+        .dropdown-item {
+            display: block; /* Display each item in a block */
+            width: 100%; /* Set the width of each item to 100% */
+            white-space: nowrap; /* Prevent wrapping of text */
+        }
+
+        .list-group-item {
+            display: block; /* Display each item in a block */
+            width: 100%; /* Set the width of each item to 100% */
+            padding: 10px; /* Add padding for spacing */
+            border: none; /* Remove default border */
+            background-color: transparent; /* Make background transparent */
+            cursor: pointer; /* Add pointer cursor */
+        }
+
+        .search-container {
+            position: relative; /* Position container absolute to enable absolute positioning */
+            right: 0; /* Align to the right */
+            top: 100%; /* Position below the loop icon */
+            margin-top: 5px; /* Adjust margin */
+            display: none; /* Hide search container by default */
+        }
+
+        .search-input {
+            padding: 6px 10px; /* Adjust padding */
+            border: 1px solid #ced4da; /* Add border */
+            border-radius: 5px; /* Add border radius */
+            font-size: 16px; /* Adjust font size */
+            width: 200px; /* Adjust width */
+        }
+
+
+        .search-icon {
+            position: absolute; /* Position icon absolute */
+            right: 10px; /* Adjust position */
+            top: 50%; /* Align vertically */
+            transform: translateY(-50%); /* Center vertically */
+            cursor: pointer; /* Add pointer cursor */
+        }
+    </style>
+
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-page="/Index">Hryhoriichuk.Instagram</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/swagger">Swagger</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Feed" asp-action="Feed">Feed</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/Explore">Explore</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Profile" asp-action="Index" asp-route-username="@User.Identity.Name">My Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Post" asp-action="UploadMedia">+</a>
+                        </li>
+                        <li class="nav-item">
+                            <button id="search-toggle-btn" class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i> <!-- Loop icon -->
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="btn btn-outline-primary" onclick="location.href='@Url.Action("Index", "Notification")'">
+                                <i class="bi bi-bell"></i>
+                                @if (ViewData["unreadNotificationsCount"] != null)
+                                {
+                                    <span class="badge badge-pill badge-danger" style="color: red;">@ViewData["unreadNotificationsCount"]</span>
+                                }
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col search-container">
+                                        <input id="live-search-input" type="search" placeholder="Search" aria-label="Search" name="query" class="search-input kw" autocomplete="off" style="padding: 6px 10px;" />
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col">
+                                        <div class="dropdown" id="search-dropdown">
+                                            <!-- Add a class to the dropdown-menu to apply custom styles -->
+                                            <div class="dropdown-menu dropdown-custom" aria-labelledby="searchDropdownButton" id="search-results-dropdown">
+                                                <!-- Add the 'list-group' class to display users as a list -->
+                                                <div id="search-results" class="dropdown-content result list-group"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    
+
+                </div>
+                <partial name="_LoginPartial" />
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - Denys Hryhoriichuk - <a href="/Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script>
+        $(document).ready(function () {
+            // Toggle search container visibility
+            $('#search-toggle-btn').click(function () {
+                $('.search-container').toggle();
+            });
+
+            $('#live-search-input').on('input', function () {
+                var query = $(this).val();
+
+                // Perform live search while typing
+                $.ajax({
+                    url: "/Search",
+                    type: 'GET',
+                    data: { query: query },
+                    success: function (response) {
+                        if (response.trim().length > 0) {
+                            $('#search-results-dropdown').show(); // Show the dropdown menu
+                            $('#search-results').html(response);
+                        } else {
+                            $('#search-results-dropdown').hide(); // Hide the dropdown menu
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                    }
+                });
+            });
+
+            // Hide the dropdown menu when the input field is blurred
+            $('#live-search-input').on('blur', function () {
+                // Delay hiding the dropdown menu to allow time for clicking on it
+                setTimeout(function () {
+                    $('#search-results-dropdown').hide();
+                }, 200);
+            });
+        });
+    </script>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

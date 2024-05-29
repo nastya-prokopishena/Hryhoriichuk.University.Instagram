@@ -1,0 +1,35 @@
+﻿@model List<Hryhoriichuk.University.Instagram.Web.Models.Post>
+
+<style>
+    .post-username {
+        font-weight: bold;
+        color: inherit; /* Inherit the color from the parent */
+        text-decoration: none; /* Remove underline */
+    }
+
+    .post-image {
+        max-width: 100%;
+        border-radius: 5px;
+        width: 1080px;
+    }
+</style>
+
+@foreach (var post in Model)
+{
+    <div class="post-container">
+        <div class="post-header">
+            <img src="@post.User.ProfilePicturePath" alt="Profile Picture" class="post-profile-picture">
+            <a href="/Profile/@post.User.UserName" class="post-username">@post.User.UserName</a>
+        </div>
+        <img src="@post.ImagePath" class="post-image" alt="Post Image">
+        <p class="post-caption">@post.Caption</p>
+        <p class="post-date">Date Posted: @post.DatePosted.ToShortDateString()</p>
+
+        @await Html.PartialAsync("_LikesPartial", Model)
+
+        <!-- Include partial view for displaying comments -->
+        <div class="comment-container">
+            @await Html.PartialAsync("_CommentsPartial", Model)
+        </div>
+    </div>
+}
